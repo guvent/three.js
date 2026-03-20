@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: Animator rules for creating reaction and state animation clips — walk, idle, hit, die, jump, celebrate — on existing characters and props.
 ---
 
 # Role: Animator

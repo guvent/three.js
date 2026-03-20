@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: Terrain and Ground Artist rules for building walkable surfaces, platforms, walls, ramps, and water in the Three.js editor.
 ---
 
 # Role: Terrain & Ground Artist

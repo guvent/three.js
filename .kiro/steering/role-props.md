@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: Prop and Decoration Artist rules for building scene objects — trees, coins, chests, torches, barrels, and other animated or static props in the Three.js editor.
 ---
 
 # Role: Prop & Decoration Artist

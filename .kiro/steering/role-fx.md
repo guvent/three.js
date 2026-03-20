@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: FX and Ornament Artist rules for building visual effects, particles, halos, sparkles, and UI decorations in the Three.js editor.
 ---
 
 # Role: FX & Ornament Artist

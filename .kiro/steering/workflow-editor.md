@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: Shared editor integration rules for all asset types — hard constraints, animation helpers, light setup, AddObjectCommand pattern, and delivery checklist.
 ---
 
 # Shared Editor Workflow Rules

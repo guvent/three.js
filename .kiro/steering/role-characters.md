@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: Character Artist rules for building humanoid and creature figures with walk/idle animations in the Three.js editor.
 ---
 
 # Role: Character Artist
