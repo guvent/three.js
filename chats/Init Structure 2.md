@@ -1,6 +1,6 @@
 # Could you run it in your browser and examine it? (Continued)
 
-Exported: 3/20/2026, 5:41:07 PM
+Exported: 3/20/2026, 5:56:30 PM
 
 ## Steering Documents
 
@@ -219,5 +219,43 @@ So from now on, every new chat will start with full context loaded, and every se
 One issue: `puppet-character` is missing `tasks.md`. Everything else created this session is complete.
 
 All specs are now complete. `puppet-character/tasks.md` was the only missing file — created it.
+
+---
+
+**User:**
+
+We still have one more thing missing.
+We could start the editor in the browser using the "yarn start" command.
+And if you remember, I asked you to show the completed task in the editor after placing it in the examples/ directory, and you were able to do that.
+As we discussed before, the completed tasks should also be visible in the editor.
+Could you add this to the ./kiro directory so we can do it in every chat?
+
+---
+
+**Assistant:**
+
+Good. You want every asset to be visible in the editor (via `Menubar.Add.js`) as a standing rule — not just in the standalone preview. The best place to encode this is in `workflow-editor.md` as a hard rule, and also add it to the delivery checklist. Let me update that now:
+
+Now update the delivery checklist to make both deliverables explicit:
+
+Also update the `agentStop` hook prompt to explicitly check for both deliverables:
+
+Done. Here's what changed:
+
+`workflow-editor.md` now has three enforced rules:
+- Both `Menubar.Add.js` entry and `examples/misc_<name>.html` are explicitly marked MANDATORY
+- Server URL is documented (`yarn start` → `http://localhost:8080/editor/`)
+- Delivery checklist lists both deliverables at the top
+
+The `agentStop` hook now also checks that both files exist after every session and flags it to you if either is missing.
+
+Checking both deliverables and spec files for all assets built so far.
+
+Everything checks out. Both assets have their deliverables:
+
+- `Puppet` → `editor/js/Menubar.Add.js` ✓ + `examples/misc_puppet.html` ✓
+- `Walking Scene` → `editor/js/Menubar.Add.js` ✓ + `examples/misc_walking_scene.html` ✓
+
+All spec folders have both `tasks.md` and `design.md`. Nothing to flag.
 
 ---
