@@ -44,11 +44,31 @@
 			controls.update();
 
 			// ── Lights ────────────────────────────────────────────────────
-			scene.add( new THREE.AmbientLight( 0xffffff, 1.5 ) );
-			const sun = new THREE.DirectionalLight( 0xfff0cc, 2 );
+			scene.add( new THREE.AmbientLight( 0xffffff, 0.8 ) );
+
+			// Angled sun — wide soft shadow across the whole scene
+			const sun = new THREE.DirectionalLight( 0xfff0cc, 1.2 );
 			sun.position.set( 5, 10, 5 );
 			sun.castShadow = true;
+			sun.shadow.mapSize.set( 1024, 1024 );
+			sun.shadow.camera.near = 0.5;
+			sun.shadow.camera.far = 30;
+			sun.shadow.camera.left = - 8;
+			sun.shadow.camera.right = 8;
+			sun.shadow.camera.top = 8;
+			sun.shadow.camera.bottom = - 8;
+			sun.shadow.bias = - 0.001;
 			scene.add( sun );
+
+			// Overhead spot — follows the character, casts a crisp shadow directly below
+			const overheadSpot = new THREE.SpotLight( 0xffffff, 3, 12, Math.PI / 6, 0.4, 1 );
+			overheadSpot.castShadow = true;
+			overheadSpot.shadow.mapSize.set( 512, 512 );
+			overheadSpot.shadow.camera.near = 1;
+			overheadSpot.shadow.camera.far = 10;
+			overheadSpot.shadow.bias = - 0.002;
+			scene.add( overheadSpot );
+			scene.add( overheadSpot.target );
 
 			// ── Terrain ───────────────────────────────────────────────────
 			// Grass ground
@@ -164,6 +184,14 @@
 
 			scene.add( root );
 
+			// Enable shadow casting/receiving on every character mesh
+			root.traverse( child => {
+				if ( child.isMesh ) {
+					child.castShadow = true;
+					child.receiveShadow = true;
+				}
+			} );
+
 			// ── Walk animation clip ───────────────────────────────────────
 			const D = 2, N = 17;
 			const times = Array.from( { length: N }, ( _, i ) => ( i / ( N - 1 ) ) * D );
@@ -222,6 +250,11 @@
 					walkDir = 1;
 					root.rotation.y = 0;
 				}
+
+				// Keep overhead spot directly above the character
+				overheadSpot.position.set( root.position.x, root.position.y + 5, root.position.z );
+				overheadSpot.target.position.set( root.position.x, 0, root.position.z );
+				overheadSpot.target.updateMatrixWorld();
 
 				controls.update();
 				renderer.render( scene, camera );

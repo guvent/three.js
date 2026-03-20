@@ -40,6 +40,10 @@ A humanoid toon-shaded character with a looping walk cycle that paces back and f
 - Walks Z axis between -4.5 and +4.5 at 2 units/second
 - Flips `rotation.y` by π on turnaround
 
+## Shadows
+- All meshes: `castShadow = true`, `receiveShadow = true` (set via `root.traverse` after `scene.add`)
+- Receives crisp downward shadow from the scene's overhead `SpotLight` (see walking-scene terrain spec)
+
 ## Delivered files
 - `examples/misc_walking_scene.html` — embedded in walking scene
 

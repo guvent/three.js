@@ -17,8 +17,9 @@ A simple outdoor scene with a grass ground plane and a dirt path running along t
 `MeshToonMaterial` throughout (standalone preview).
 
 ## Lighting
-- `AmbientLight(0xffffff, 1.5)`
-- `DirectionalLight(0xfff0cc, 2)` at (5, 10, 5), `castShadow: true`
+- `AmbientLight(0xffffff, 0.8)`
+- `DirectionalLight(0xfff0cc, 1.2)` at (5, 10, 5), `castShadow: true`, shadow camera ±8 units, bias -0.001
+- `SpotLight(0xffffff, 3)` — angle π/6, penumbra 0.4, range 12 — positioned 5 units above Walker each frame, target tracks Walker's XZ position; casts crisp overhead shadow
 
 ## Scene settings
 - Background: `0x87ceeb` (sky blue)
