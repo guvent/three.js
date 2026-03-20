@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js – Dusty Road Scene</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<link type="text/css" rel="stylesheet" href="main.css">
+	</head>
+	<body>
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> – Dusty Road Scene
+		</div>
+
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "../build/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+
+		<script type="module">
+			import * as THREE from 'three';
+			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+			import Stats from 'three/addons/libs/stats.module.js';
+
+			// ── Renderer ─────────────────────────────────────────────────
+			const renderer = new THREE.WebGLRenderer( { antialias: true } );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.shadowMap.enabled = true;
+			document.body.appendChild( renderer.domElement );
+
+			const stats = new Stats();
+			document.body.appendChild( stats.dom );
+
+			// ── Scene / Camera ────────────────────────────────────────────
+			const scene = new THREE.Scene();
+			scene.background = new THREE.Color( 0x87ceeb );
+			scene.fog = new THREE.Fog( 0x87ceeb, 20, 60 );
+
+			const camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
+			camera.position.set( 0, 4, 10 );
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+			controls.target.set( 0, 1, 0 );
+			controls.update();
+
+			// ── Lights ────────────────────────────────────────────────────
+			scene.add( new THREE.AmbientLight( 0xffffff, 1.5 ) );
+			const sun = new THREE.DirectionalLight( 0xfff0cc, 2.0 );
+			sun.position.set( 5, 10, 5 );
+			sun.castShadow = true;
+			scene.add( sun );
+
+			// ── Material helpers ──────────────────────────────────────────
+			function tmat( color, roughness = 0.9 ) {
+				return new THREE.MeshToonMaterial( { color } );
+			}
+			function cmat( color ) {
+				return new THREE.MeshToonMaterial( { color } );
+			}
+
+			// ── Terrain ───────────────────────────────────────────────────
+			const sceneRoot = new THREE.Group();
+			sceneRoot.name = 'DustyRoadScene';
+
+			const ground = new THREE.Mesh( new THREE.PlaneGeometry( 28, 28 ), tmat( 0x5a8a3c ) );
+			ground.rotation.x = - Math.PI / 2;
+			ground.name = 'ground';
+			sceneRoot.add( ground );
+
+			const shoulder = new THREE.Mesh( new THREE.BoxGeometry( 3.2, 0.015, 14 ), tmat( 0xb8956a ) );
+			shoulder.position.set( 0, 0.008, 0 );
+			shoulder.name = 'shoulder';
+			sceneRoot.add( shoulder );
+
+			const road = new THREE.Mesh( new THREE.BoxGeometry( 2.2, 0.02, 14 ), tmat( 0xc4a882 ) );
+			road.position.set( 0, 0.012, 0 );
+			road.name = 'road';
+			sceneRoot.add( road );
+
+			[ - 0.55, 0.55 ].forEach( x => {
+				const track = new THREE.Mesh( new THREE.BoxGeometry( 0.18, 0.021, 14 ), tmat( 0xa8906a ) );
+				track.position.set( x, 0.013, 0 );
+				sceneRoot.add( track );
+			} );
+
+			// ── Character ─────────────────────────────────────────────────
+			const walker = new THREE.Group();
+			walker.name = 'walker';
+			walker.position.set( 0, 1, 0 );
+
+			walker.add( new THREE.Mesh( new THREE.CapsuleGeometry( 0.28, 0.5, 8, 16 ), cmat( 0xe63946 ) ) );
+
+			const neck = new THREE.Mesh( new THREE.CylinderGeometry( 0.08, 0.1, 0.15, 12 ), cmat( 0xf4c07a ) );
+			neck.position.y = 0.45;
+			walker.add( neck );
+
+			const headGroup = new THREE.Group();
+			headGroup.name = 'head';
+			headGroup.position.y = 0.75;
+			walker.add( headGroup );
+			headGroup.add( new THREE.Mesh( new THREE.SphereGeometry( 0.28, 32, 32 ), cmat( 0xf4c07a ) ) );
+			const hair = new THREE.Mesh( new THREE.SphereGeometry( 0.29, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.45 ), cmat( 0x3d2b1f ) );
+			hair.position.y = 0.05;
+			headGroup.add( hair );
+			[ - 0.1, 0.1 ].forEach( x => {
+				const eye = new THREE.Mesh( new THREE.SphereGeometry( 0.04, 16, 16 ), cmat( 0x1d3557 ) );
+				eye.position.set( x, 0.05, 0.25 );
+				headGroup.add( eye );
+			} );
+
+			const armGeo = new THREE.CapsuleGeometry( 0.07, 0.35, 8, 12 );
+			const leftArm = new THREE.Group(); leftArm.name = 'leftArm'; leftArm.position.set( - 0.38, 0.28, 0 ); walker.add( leftArm );
+			const lAM = new THREE.Mesh( armGeo, cmat( 0xe63946 ) ); lAM.position.y = - 0.22; leftArm.add( lAM );
+			const lH = new THREE.Mesh( new THREE.SphereGeometry( 0.07, 12, 12 ), cmat( 0xf4c07a ) ); lH.position.y = - 0.48; leftArm.add( lH );
+
+			const rightArm = new THREE.Group(); rightArm.name = 'rightArm'; rightArm.position.set( 0.38, 0.28, 0 ); walker.add( rightArm );
+			const rAM = new THREE.Mesh( armGeo, cmat( 0xe63946 ) ); rAM.position.y = - 0.22; rightArm.add( rAM );
+			const rH = new THREE.Mesh( new THREE.SphereGeometry( 0.07, 12, 12 ), cmat( 0xf4c07a ) ); rH.position.y = - 0.48; rightArm.add( rH );
+
+			const legGeo = new THREE.CapsuleGeometry( 0.09, 0.4, 8, 12 );
+			const leftLeg = new THREE.Group(); leftLeg.name = 'leftLeg'; leftLeg.position.set( - 0.14, - 0.45, 0 ); walker.add( leftLeg );
+			const lLM = new THREE.Mesh( legGeo, cmat( 0x457b9d ) ); lLM.position.y = - 0.25; leftLeg.add( lLM );
+			const lS = new THREE.Mesh( new THREE.CapsuleGeometry( 0.08, 0.14, 8, 8 ), cmat( 0x1d3557 ) ); lS.rotation.x = Math.PI / 2; lS.position.set( - 0.03, - 0.52, 0.05 ); leftLeg.add( lS );
+
+			const rightLeg = new THREE.Group(); rightLeg.name = 'rightLeg'; rightLeg.position.set( 0.14, - 0.45, 0 ); walker.add( rightLeg );
+			const rLM = new THREE.Mesh( legGeo, cmat( 0x457b9d ) ); rLM.position.y = - 0.25; rightLeg.add( rLM );
+			const rS = new THREE.Mesh( new THREE.CapsuleGeometry( 0.08, 0.14, 8, 8 ), cmat( 0x1d3557 ) ); rS.rotation.x = Math.PI / 2; rS.position.set( 0.03, - 0.52, 0.05 ); rightLeg.add( rS );
+
+			sceneRoot.add( walker );
+			scene.add( sceneRoot );
+
+			// ── Walk clip ─────────────────────────────────────────────────
+			const D = 2, N = 17;
+			const times = Array.from( { length: N }, ( _, i ) => ( i / ( N - 1 ) ) * D );
+
+			function sineQuatTrack( name, amplitude, phase ) {
+				const q = new THREE.Quaternion();
+				const axis = new THREE.Vector3( 1, 0, 0 );
+				const values = [];
+				for ( let i = 0; i < N; i ++ ) {
+					const angle = amplitude * Math.sin( ( times[ i ] / D ) * Math.PI * 2 + phase );
+					q.setFromAxisAngle( axis, angle );
+					values.push( q.x, q.y, q.z, q.w );
+				}
+				return new THREE.QuaternionKeyframeTrack( name, times, values );
+			}
+
+			const walkClip = new THREE.AnimationClip( 'WalkerWalk', D, [
+				new THREE.NumberKeyframeTrack( 'walker.position[y]', times, times.map( t => 1 + 0.08 * Math.sin( ( t / D ) * Math.PI * 2 ) ) ),
+				sineQuatTrack( 'walker/head.quaternion', 0.06, 0 ),
+				sineQuatTrack( 'walker/leftArm.quaternion', 0.6, 0 ),
+				sineQuatTrack( 'walker/rightArm.quaternion', 0.6, Math.PI ),
+				sineQuatTrack( 'walker/leftLeg.quaternion', 0.4, Math.PI ),
+				sineQuatTrack( 'walker/rightLeg.quaternion', 0.4, 0 ),
+			] );
+
+			const mixer = new THREE.AnimationMixer( sceneRoot );
+			mixer.clipAction( walkClip, sceneRoot ).play();
+
+			// ── Dust puff pool ────────────────────────────────────────────
+			const POOL_SIZE = 6, PPP = 6, PUFF_DUR = 0.55;
+			const dustMat = new THREE.MeshToonMaterial( { color: 0xd4b896, transparent: true, opacity: 0 } );
+			const puffPool = [];
+			for ( let p = 0; p < POOL_SIZE; p ++ ) {
+				const puff = new THREE.Group(); puff.visible = false;
+				for ( let i = 0; i < PPP; i ++ ) {
+					const m = new THREE.Mesh( new THREE.SphereGeometry( 0.07 + Math.random() * 0.05, 4, 4 ), dustMat.clone() );
+					const angle = ( i / PPP ) * Math.PI * 2 + Math.random() * 0.5;
+					m.userData.vx = Math.cos( angle ) * ( 0.6 + Math.random() * 0.4 );
+					m.userData.vz = Math.sin( angle ) * ( 0.6 + Math.random() * 0.4 );
+					m.userData.vy = 0.8 + Math.random() * 0.6;
+					puff.add( m );
+				}
+				sceneRoot.add( puff );
+				puffPool.push( { group: puff, life: 0, active: false } );
+			}
+			let poolIdx = 0;
+
+			function spawnDust( x, z ) {
+				const e = puffPool[ poolIdx ++ % POOL_SIZE ];
+				e.active = true; e.life = 0;
+				e.group.visible = true;
+				e.group.position.set( x, 0, z );
+				e.group.children.forEach( m => {
+					m.position.set( ( Math.random() - 0.5 ) * 0.15, 0.05, ( Math.random() - 0.5 ) * 0.15 );
+					m.material.opacity = 0.75; m.scale.setScalar( 1 );
+				} );
+			}
+
+			// ── Animate loop ──────────────────────────────────────────────
+			const clock = new THREE.Clock();
+			let prevLA = 0, prevRA = 0, dustTime = 0;
+
+			renderer.setAnimationLoop( function () {
+				const delta = clock.getDelta();
+				mixer.update( delta );
+
+				dustTime += delta;
+				const phase = ( ( dustTime % D ) / D ) * Math.PI * 2;
+				const la = 0.4 * Math.sin( phase + Math.PI );
+				const ra = 0.4 * Math.sin( phase );
+				if ( prevLA > 0.05 && la <= 0.05 ) spawnDust( walker.position.x - 0.14, walker.position.z );
+				if ( prevRA > 0.05 && ra <= 0.05 ) spawnDust( walker.position.x + 0.14, walker.position.z );
+				prevLA = la; prevRA = ra;
+
+				puffPool.forEach( e => {
+					if ( ! e.active ) return;
+					e.life += delta;
+					const t = e.life / PUFF_DUR;
+					if ( t >= 1 ) { e.active = false; e.group.visible = false; return; }
+					const ease = 1 - t * t;
+					e.group.children.forEach( m => {
+						m.position.x += m.userData.vx * delta * ease;
+						m.position.y += m.userData.vy * delta * ease;
+						m.position.z += m.userData.vz * delta * ease;
+						const s = t < 0.3 ? t / 0.3 : 1 - ( t - 0.3 ) / 0.7;
+						m.scale.setScalar( s * 1.4 );
+						m.material.opacity = t < 0.4 ? 0.75 : 0.75 * ( 1 - ( t - 0.4 ) / 0.6 );
+					} );
+				} );
+
+				controls.update();
+				renderer.render( scene, camera );
+				stats.update();
+			} );
+
+			window.addEventListener( 'resize', () => {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			} );
+		</script>
+	</body>
+</html>

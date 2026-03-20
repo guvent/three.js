@@ -507,12 +507,12 @@ function MenubarAdd( editor ) {
 
 	option = new UIRow();
 	option.setClass( 'option' );
-	option.setTextContent( 'Walking Scene' );
+	option.setTextContent( 'Dusty Road Scene' );
 	option.onClick( function () {
 
 		// ── Terrain ──────────────────────────────────────────────────────
 		const sceneRoot = new THREE.Group();
-		sceneRoot.name = 'WalkingScene';
+		sceneRoot.name = 'DustyRoadScene';
 
 		function tmat( color, roughness = 0.9 ) {
 			return new THREE.MeshStandardMaterial( { color, roughness, metalness: 0 } );
