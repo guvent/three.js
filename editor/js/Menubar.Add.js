@@ -503,6 +503,245 @@ function MenubarAdd( editor ) {
 	} );
 	cameraSubmenu.add( option );
 
+	// Puppet
+
+	option = new UIRow();
+	option.setClass( 'option' );
+	option.setTextContent( 'Puppet' );
+	option.onClick( function () {
+
+		function mat( color ) {
+
+			return new THREE.MeshToonMaterial( { color } );
+
+		}
+
+		const puppet = new THREE.Group();
+		puppet.name = 'Puppet';
+		puppet.position.y = 1;
+
+		// Body
+		const body = new THREE.Mesh( new THREE.CapsuleGeometry( 0.55, 1.0, 8, 16 ), mat( 0xe63946 ) );
+		puppet.add( body );
+
+		// Neck
+		const neck = new THREE.Mesh( new THREE.CylinderGeometry( 0.15, 0.18, 0.3, 12 ), mat( 0xf4c07a ) );
+		neck.name = 'neck';
+		neck.position.y = 0.9;
+		puppet.add( neck );
+
+		// Head group
+		const headGroup = new THREE.Group();
+		headGroup.name = 'head';
+		headGroup.position.y = 1.5;
+		puppet.add( headGroup );
+
+		headGroup.add( new THREE.Mesh( new THREE.SphereGeometry( 0.55, 32, 32 ), mat( 0xf4c07a ) ) );
+
+		// Hair
+		const hair = new THREE.Mesh( new THREE.SphereGeometry( 0.57, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.45 ), mat( 0x3d2b1f ) );
+		hair.position.y = 0.1;
+		headGroup.add( hair );
+
+		// Eyes
+		[ - 0.2, 0.2 ].forEach( x => {
+
+			const eye = new THREE.Mesh( new THREE.SphereGeometry( 0.08, 16, 16 ), mat( 0x1d3557 ) );
+			eye.position.set( x, 0.1, 0.5 );
+			headGroup.add( eye );
+
+			const hl = new THREE.Mesh( new THREE.SphereGeometry( 0.03, 8, 8 ), mat( 0xffffff ) );
+			hl.position.set( x + 0.03, 0.13, 0.57 );
+			headGroup.add( hl );
+
+		} );
+
+		// Nose
+		const nose = new THREE.Mesh( new THREE.SphereGeometry( 0.07, 12, 12 ), mat( 0xe8a87c ) );
+		nose.position.set( 0, - 0.05, 0.54 );
+		headGroup.add( nose );
+
+		// Mouth
+		const mouth = new THREE.Mesh( new THREE.TorusGeometry( 0.13, 0.03, 8, 16, Math.PI ), mat( 0xc1440e ) );
+		mouth.position.set( 0, - 0.22, 0.48 );
+		mouth.rotation.z = Math.PI;
+		headGroup.add( mouth );
+
+		// Ears
+		[ - 1, 1 ].forEach( side => {
+
+			const ear = new THREE.Mesh( new THREE.SphereGeometry( 0.12, 12, 12 ), mat( 0xf4c07a ) );
+			ear.position.set( side * 0.55, 0, 0 );
+			headGroup.add( ear );
+
+		} );
+
+		// Arms
+		const armGeo = new THREE.CapsuleGeometry( 0.13, 0.7, 8, 12 );
+
+		const leftArm = new THREE.Group();
+		leftArm.name = 'leftArm';
+		leftArm.position.set( - 0.75, 0.55, 0 );
+		puppet.add( leftArm );
+		const lArmMesh = new THREE.Mesh( armGeo, mat( 0xe63946 ) );
+		lArmMesh.position.y = - 0.45;
+		leftArm.add( lArmMesh );
+		const lHand = new THREE.Mesh( new THREE.SphereGeometry( 0.14, 12, 12 ), mat( 0xf4c07a ) );
+		lHand.position.y = - 0.95;
+		leftArm.add( lHand );
+
+		const rightArm = new THREE.Group();
+		rightArm.name = 'rightArm';
+		rightArm.position.set( 0.75, 0.55, 0 );
+		puppet.add( rightArm );
+		const rArmMesh = new THREE.Mesh( armGeo, mat( 0xe63946 ) );
+		rArmMesh.position.y = - 0.45;
+		rightArm.add( rArmMesh );
+		const rHand = new THREE.Mesh( new THREE.SphereGeometry( 0.14, 12, 12 ), mat( 0xf4c07a ) );
+		rHand.position.y = - 0.95;
+		rightArm.add( rHand );
+
+		// Legs
+		const legGeo = new THREE.CapsuleGeometry( 0.16, 0.8, 8, 12 );
+
+		const leftLeg = new THREE.Group();
+		leftLeg.name = 'leftLeg';
+		leftLeg.position.set( - 0.28, - 0.9, 0 );
+		puppet.add( leftLeg );
+		const lLegMesh = new THREE.Mesh( legGeo, mat( 0x457b9d ) );
+		lLegMesh.position.y = - 0.5;
+		leftLeg.add( lLegMesh );
+		const lShoe = new THREE.Mesh( new THREE.CapsuleGeometry( 0.14, 0.25, 8, 8 ), mat( 0x1d3557 ) );
+		lShoe.rotation.x = Math.PI / 2;
+		lShoe.position.set( - 0.05, - 1.05, 0.1 );
+		leftLeg.add( lShoe );
+
+		const rightLeg = new THREE.Group();
+		rightLeg.name = 'rightLeg';
+		rightLeg.position.set( 0.28, - 0.9, 0 );
+		puppet.add( rightLeg );
+		const rLegMesh = new THREE.Mesh( legGeo, mat( 0x457b9d ) );
+		rLegMesh.position.y = - 0.5;
+		rightLeg.add( rLegMesh );
+		const rShoe = new THREE.Mesh( new THREE.CapsuleGeometry( 0.14, 0.25, 8, 8 ), mat( 0x1d3557 ) );
+		rShoe.rotation.x = Math.PI / 2;
+		rShoe.position.set( 0.05, - 1.05, 0.1 );
+		rightLeg.add( rShoe );
+
+		// Strings
+		const strMat = new THREE.LineBasicMaterial( { color: 0xaaaaaa, transparent: true, opacity: 0.5 } );
+		const barMat = new THREE.LineBasicMaterial( { color: 0x8b6914 } );
+		const top = 6;
+
+		[ [ 0, 1.9 ], [ - 0.75, 0.55 ], [ 0.75, 0.55 ], [ - 0.28, - 0.9 ], [ 0.28, - 0.9 ] ].forEach( ( [ x, y ] ) => {
+
+			const pts = [ new THREE.Vector3( x * 0.4, top, 0 ), new THREE.Vector3( x, y, 0 ) ];
+			puppet.add( new THREE.Line( new THREE.BufferGeometry().setFromPoints( pts ), strMat ) );
+
+		} );
+
+		puppet.add( new THREE.Line( new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( - 0.5, top, 0 ), new THREE.Vector3( 0.5, top, 0 ) ] ), barMat ) );
+		puppet.add( new THREE.Line( new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( - 0.3, top - 0.8, 0 ), new THREE.Vector3( 0.3, top - 0.8, 0 ) ] ), barMat ) );
+
+		// ── AnimationClip via keyframe tracks ─────────────────────────────
+		// One full cycle = 2π / 2 ≈ 3.14 s  →  use duration = 2 s for a snappy walk
+		const D = 2; // seconds per loop
+		const N = 17; // samples per track (smooth sine)
+		const times = [];
+
+		for ( let i = 0; i < N; i ++ ) times.push( ( i / ( N - 1 ) ) * D );
+
+		function sineValues( amplitude, phaseOffset, component ) {
+
+			// returns flat array of quaternion xyzw values sampled from a rotation around X
+			const q = new THREE.Quaternion();
+			const axis = new THREE.Vector3( 1, 0, 0 );
+			const out = [];
+
+			for ( let i = 0; i < N; i ++ ) {
+
+				const angle = amplitude * Math.sin( ( times[ i ] / D ) * Math.PI * 2 + phaseOffset );
+				q.setFromAxisAngle( axis, angle );
+				out.push( q.x, q.y, q.z, q.w );
+
+			}
+
+			return out;
+
+		}
+
+		function bobValues() {
+
+			// puppet Y position bob
+			const out = [];
+
+			for ( let i = 0; i < N; i ++ ) {
+
+				out.push( 1 + 0.12 * Math.sin( ( times[ i ] / D ) * Math.PI * 2 ) );
+
+			}
+
+			return out;
+
+		}
+
+		const tracks = [
+			// body bob (position Y)
+			new THREE.NumberKeyframeTrack( '.position[y]', times, bobValues() ),
+			// head tilt (rotation X)
+			new THREE.QuaternionKeyframeTrack( 'head.quaternion', times, sineValues( 0.08, 0 ) ),
+			// arms swing opposite phase
+			new THREE.QuaternionKeyframeTrack( 'leftArm.quaternion', times, sineValues( 0.6, 0 ) ),
+			new THREE.QuaternionKeyframeTrack( 'rightArm.quaternion', times, sineValues( 0.6, Math.PI ) ),
+			// legs counter-phase to arms
+			new THREE.QuaternionKeyframeTrack( 'leftLeg.quaternion', times, sineValues( 0.4, Math.PI ) ),
+			new THREE.QuaternionKeyframeTrack( 'rightLeg.quaternion', times, sineValues( 0.4, 0 ) ),
+		];
+
+		const clip = new THREE.AnimationClip( 'PuppetWalk', D, tracks );
+
+		// Switch to MeshStandardMaterial so colors show without needing extra lights
+		puppet.traverse( function ( child ) {
+
+			if ( child.isMesh && child.material && child.material.isMeshToonMaterial ) {
+
+				child.material = new THREE.MeshStandardMaterial( {
+					color: child.material.color,
+					roughness: 0.8,
+					metalness: 0.0
+				} );
+
+			}
+
+		} );
+
+		// Add ambient + directional light if the scene has none
+		const hasLight = editor.scene.children.some( c => c.isLight );
+
+		if ( ! hasLight ) {
+
+			const ambient = new THREE.AmbientLight( 0xffffff, 1.5 );
+			ambient.name = 'AmbientLight';
+			editor.execute( new AddObjectCommand( editor, ambient ) );
+
+			const dirLight = new THREE.DirectionalLight( 0xfff0cc, 2 );
+			dirLight.name = 'DirectionalLight';
+			dirLight.position.set( 5, 10, 5 );
+			editor.execute( new AddObjectCommand( editor, dirLight ) );
+
+		}
+
+		// Add to scene first so the mixer can find the named children
+		editor.execute( new AddObjectCommand( editor, puppet ) );
+
+		// Play via the editor's shared mixer so the viewport animate() loop picks it up
+		const action = editor.mixer.clipAction( clip, puppet );
+		action.setLoop( THREE.LoopRepeat, Infinity );
+		action.play();
+
+	} );
+	options.add( option );
+
 	return container;
 
 }

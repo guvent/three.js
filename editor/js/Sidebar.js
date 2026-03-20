@@ -4,6 +4,7 @@ import { SidebarScene } from './Sidebar.Scene.js';
 import { SidebarProperties } from './Sidebar.Properties.js';
 import { SidebarProject } from './Sidebar.Project.js';
 import { SidebarSettings } from './Sidebar.Settings.js';
+import { SidebarDev } from './Sidebar.Dev.js';
 
 function Sidebar( editor ) {
 
@@ -20,10 +21,12 @@ function Sidebar( editor ) {
 	);
 	const project = new SidebarProject( editor );
 	const settings = new SidebarSettings( editor );
+	const dev = new SidebarDev( editor );
 
 	container.addTab( 'scene', strings.getKey( 'sidebar/scene' ), scene );
 	container.addTab( 'project', strings.getKey( 'sidebar/project' ), project );
 	container.addTab( 'settings', strings.getKey( 'sidebar/settings' ), settings );
+	container.addTab( 'dev', 'Dev', dev );
 	container.select( 'scene' );
 
 	const sidebarPropertiesResizeObserver = new ResizeObserver( function () {

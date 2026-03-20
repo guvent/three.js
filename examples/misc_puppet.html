@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js - puppet character</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<style>
+			#info { color: #fff; }
+		</style>
+	</head>
+	<body>
+
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> — simple puppet character
+		</div>
+
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "../build/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+
+		<script type="module">
+
+			import * as THREE from 'three';
+			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+			let scene, camera, renderer, controls, clock;
+
+			// Puppet parts for animation
+			let puppet, leftArm, rightArm, leftLeg, rightLeg, head;
+
+			init();
+
+			function makeMaterial( color ) {
+				return new THREE.MeshToonMaterial( { color } );
+			}
+
+			function init() {
+
+				// Scene
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0x1a1a2e );
+				scene.fog = new THREE.Fog( 0x1a1a2e, 20, 60 );
+
+				clock = new THREE.Clock();
+
+				// Camera
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
+				camera.position.set( 0, 2, 10 );
+
+				// Renderer
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.shadowMap.enabled = true;
+				renderer.setAnimationLoop( animate );
+				document.body.appendChild( renderer.domElement );
+
+				// Lights
+				const ambient = new THREE.AmbientLight( 0xffffff, 0.6 );
+				scene.add( ambient );
+
+				const dirLight = new THREE.DirectionalLight( 0xfff0cc, 1.5 );
+				dirLight.position.set( 5, 10, 5 );
+				dirLight.castShadow = true;
+				scene.add( dirLight );
+
+				// Floor
+				const floor = new THREE.Mesh(
+					new THREE.PlaneGeometry( 30, 30 ),
+					new THREE.MeshToonMaterial( { color: 0x16213e } )
+				);
+				floor.rotation.x = - Math.PI / 2;
+				floor.position.y = - 3;
+				floor.receiveShadow = true;
+				scene.add( floor );
+
+				// Controls
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.target.set( 0, 1, 0 );
+				controls.enableDamping = true;
+				controls.minDistance = 4;
+				controls.maxDistance = 20;
+				controls.update();
+
+				// Build puppet
+				buildPuppet();
+
+				window.addEventListener( 'resize', onWindowResize );
+
+			}
+
+			function buildPuppet() {
+
+				const skinColor   = 0xf4c07a;
+				const shirtColor  = 0xe63946;
+				const pantsColor  = 0x457b9d;
+				const shoeColor   = 0x1d3557;
+				const eyeColor    = 0x1d3557;
+				const mouthColor  = 0xc1440e;
+				const hairColor   = 0x3d2b1f;
+
+				puppet = new THREE.Group();
+				scene.add( puppet );
+
+				// ── Body ──────────────────────────────────────────────
+				const body = new THREE.Mesh(
+					new THREE.CapsuleGeometry( 0.55, 1.0, 8, 16 ),
+					makeMaterial( shirtColor )
+				);
+				body.position.y = 0;
+				body.castShadow = true;
+				puppet.add( body );
+
+				// ── Head ──────────────────────────────────────────────
+				head = new THREE.Group();
+				head.position.y = 1.5;
+				puppet.add( head );
+
+				const headMesh = new THREE.Mesh(
+					new THREE.SphereGeometry( 0.55, 32, 32 ),
+					makeMaterial( skinColor )
+				);
+				headMesh.castShadow = true;
+				head.add( headMesh );
+
+				// Hair
+				const hair = new THREE.Mesh(
+					new THREE.SphereGeometry( 0.57, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.45 ),
+					makeMaterial( hairColor )
+				);
+				hair.position.y = 0.1;
+				head.add( hair );
+
+				// Eyes
+				[ - 0.2, 0.2 ].forEach( x => {
+					const eye = new THREE.Mesh(
+						new THREE.SphereGeometry( 0.08, 16, 16 ),
+						makeMaterial( eyeColor )
+					);
+					eye.position.set( x, 0.1, 0.5 );
+					head.add( eye );
+
+					// Pupil highlight
+					const highlight = new THREE.Mesh(
+						new THREE.SphereGeometry( 0.03, 8, 8 ),
+						makeMaterial( 0xffffff )
+					);
+					highlight.position.set( x + 0.03, 0.13, 0.57 );
+					head.add( highlight );
+				} );
+
+				// Nose
+				const nose = new THREE.Mesh(
+					new THREE.SphereGeometry( 0.07, 12, 12 ),
+					makeMaterial( 0xe8a87c )
+				);
+				nose.position.set( 0, - 0.05, 0.54 );
+				head.add( nose );
+
+				// Mouth (torus arc)
+				const mouth = new THREE.Mesh(
+					new THREE.TorusGeometry( 0.13, 0.03, 8, 16, Math.PI ),
+					makeMaterial( mouthColor )
+				);
+				mouth.position.set( 0, - 0.22, 0.48 );
+				mouth.rotation.z = Math.PI;
+				head.add( mouth );
+
+				// Ears
+				[ - 1, 1 ].forEach( side => {
+					const ear = new THREE.Mesh(
+						new THREE.SphereGeometry( 0.12, 12, 12 ),
+						makeMaterial( skinColor )
+					);
+					ear.position.set( side * 0.55, 0, 0 );
+					head.add( ear );
+				} );
+
+				// ── Neck ──────────────────────────────────────────────
+				const neck = new THREE.Mesh(
+					new THREE.CylinderGeometry( 0.15, 0.18, 0.3, 12 ),
+					makeMaterial( skinColor )
+				);
+				neck.position.y = 0.9;
+				puppet.add( neck );
+
+				// ── Arms ──────────────────────────────────────────────
+				const armGeo = new THREE.CapsuleGeometry( 0.13, 0.7, 8, 12 );
+
+				leftArm = new THREE.Group();
+				leftArm.position.set( - 0.75, 0.55, 0 );
+				puppet.add( leftArm );
+
+				const leftArmMesh = new THREE.Mesh( armGeo, makeMaterial( shirtColor ) );
+				leftArmMesh.position.y = - 0.45;
+				leftArmMesh.castShadow = true;
+				leftArm.add( leftArmMesh );
+
+				// Left hand
+				const leftHand = new THREE.Mesh(
+					new THREE.SphereGeometry( 0.14, 12, 12 ),
+					makeMaterial( skinColor )
+				);
+				leftHand.position.y = - 0.95;
+				leftArm.add( leftHand );
+
+				rightArm = new THREE.Group();
+				rightArm.position.set( 0.75, 0.55, 0 );
+				puppet.add( rightArm );
+
+				const rightArmMesh = new THREE.Mesh( armGeo, makeMaterial( shirtColor ) );
+				rightArmMesh.position.y = - 0.45;
+				rightArmMesh.castShadow = true;
+				rightArm.add( rightArmMesh );
+
+				// Right hand
+				const rightHand = new THREE.Mesh(
+					new THREE.SphereGeometry( 0.14, 12, 12 ),
+					makeMaterial( skinColor )
+				);
+				rightHand.position.y = - 0.95;
+				rightArm.add( rightHand );
+
+				// ── Legs ──────────────────────────────────────────────
+				const legGeo = new THREE.CapsuleGeometry( 0.16, 0.8, 8, 12 );
+
+				leftLeg = new THREE.Group();
+				leftLeg.position.set( - 0.28, - 0.9, 0 );
+				puppet.add( leftLeg );
+
+				const leftLegMesh = new THREE.Mesh( legGeo, makeMaterial( pantsColor ) );
+				leftLegMesh.position.y = - 0.5;
+				leftLegMesh.castShadow = true;
+				leftLeg.add( leftLegMesh );
+
+				// Left shoe
+				const leftShoe = new THREE.Mesh(
+					new THREE.CapsuleGeometry( 0.14, 0.25, 8, 8 ),
+					makeMaterial( shoeColor )
+				);
+				leftShoe.rotation.x = Math.PI / 2;
+				leftShoe.position.set( - 0.05, - 1.05, 0.1 );
+				leftLeg.add( leftShoe );
+
+				rightLeg = new THREE.Group();
+				rightLeg.position.set( 0.28, - 0.9, 0 );
+				puppet.add( rightLeg );
+
+				const rightLegMesh = new THREE.Mesh( legGeo, makeMaterial( pantsColor ) );
+				rightLegMesh.position.y = - 0.5;
+				rightLegMesh.castShadow = true;
+				rightLeg.add( rightLegMesh );
+
+				// Right shoe
+				const rightShoe = new THREE.Mesh(
+					new THREE.CapsuleGeometry( 0.14, 0.25, 8, 8 ),
+					makeMaterial( shoeColor )
+				);
+				rightShoe.rotation.x = Math.PI / 2;
+				rightShoe.position.set( 0.05, - 1.05, 0.1 );
+				rightLeg.add( rightShoe );
+
+				// ── Puppet strings (visual) ───────────────────────────
+				const stringMat = new THREE.LineBasicMaterial( { color: 0xaaaaaa, transparent: true, opacity: 0.5 } );
+				const stringTop = 6;
+
+				[ [ 0, 1.9 ], [ - 0.75, 0.55 ], [ 0.75, 0.55 ], [ - 0.28, - 0.9 ], [ 0.28, - 0.9 ] ].forEach( ( [ x, y ] ) => {
+					const points = [ new THREE.Vector3( x * 0.4, stringTop, 0 ), new THREE.Vector3( x, y, 0 ) ];
+					const line = new THREE.Line( new THREE.BufferGeometry().setFromPoints( points ), stringMat );
+					puppet.add( line );
+				} );
+
+				// Cross bar at top
+				const barPoints = [ new THREE.Vector3( - 0.5, stringTop, 0 ), new THREE.Vector3( 0.5, stringTop, 0 ) ];
+				const bar = new THREE.Line( new THREE.BufferGeometry().setFromPoints( barPoints ), new THREE.LineBasicMaterial( { color: 0x8b6914 } ) );
+				puppet.add( bar );
+
+				const barPoints2 = [ new THREE.Vector3( - 0.3, stringTop - 0.8, 0 ), new THREE.Vector3( 0.3, stringTop - 0.8, 0 ) ];
+				const bar2 = new THREE.Line( new THREE.BufferGeometry().setFromPoints( barPoints2 ), new THREE.LineBasicMaterial( { color: 0x8b6914 } ) );
+				puppet.add( bar2 );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function animate() {
+
+				const t = clock.getElapsedTime();
+
+				// Gentle body bob
+				puppet.position.y = Math.sin( t * 2 ) * 0.12;
+
+				// Head slight tilt
+				head.rotation.z = Math.sin( t * 1.5 ) * 0.08;
+				head.rotation.y = Math.sin( t * 0.8 ) * 0.12;
+
+				// Swinging arms (opposite phase)
+				leftArm.rotation.x  = Math.sin( t * 2 ) * 0.6;
+				rightArm.rotation.x = Math.sin( t * 2 + Math.PI ) * 0.6;
+
+				// Swinging legs (opposite phase to arms)
+				leftLeg.rotation.x  = Math.sin( t * 2 + Math.PI ) * 0.4;
+				rightLeg.rotation.x = Math.sin( t * 2 ) * 0.4;
+
+				controls.update();
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>
