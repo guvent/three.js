@@ -4,14 +4,17 @@
 Terrain
 
 ## Description
-A simple outdoor scene with a grass ground plane and a dirt path running along the Z axis, used as the environment for the Walker character preview.
+A plot of land with a dusty dirt road running along the Z axis, used as the environment for the Walker character preview.
 
 ## Geometry
 
 | Part | Geometry | Color |
 |------|----------|-------|
-| Grass ground | `PlaneGeometry(20, 20)` rotated X -90° | `0x5a8a3c` |
-| Dirt path | `BoxGeometry(1.4, 0.02, 10)` at Y=0.01 | `0xa0785a` |
+| Grass ground | `PlaneGeometry(28, 28)` rotated X -90° | `0x5a8a3c` |
+| Road shoulder | `BoxGeometry(3.2, 0.015, 14)` at Y=0.008 | `0xb8956a` |
+| Dusty road surface | `BoxGeometry(2.2, 0.02, 14)` at Y=0.012 | `0xc4a882` |
+| Wheel tracks (×2) | `BoxGeometry(0.18, 0.021, 14)` at X=±0.55 | `0xa8906a` |
+| Dust patches (×8) | `CylinderGeometry` random radii, Y=0.022 | `0xd4b896` transparent |
 
 ## Materials
 `MeshToonMaterial` throughout (standalone preview).

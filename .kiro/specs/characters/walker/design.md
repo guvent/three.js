@@ -37,7 +37,7 @@ A humanoid toon-shaded character with a looping walk cycle that paces back and f
 | Walk | 2s | LoopRepeat | `.position[y]` bob (amp 0.08) + 5 quaternion tracks |
 
 ## Path traversal
-- Walks Z axis between -4.5 and +4.5 at 2 units/second
+- Walks Z axis between -6 and +6 at 2 units/second
 - Flips `rotation.y` by π on turnaround
 
 ## Shadows

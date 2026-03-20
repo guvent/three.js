@@ -518,17 +518,30 @@ function MenubarAdd( editor ) {
 			return new THREE.MeshStandardMaterial( { color, roughness, metalness: 0 } );
 		}
 
-		// Grass ground
-		const ground = new THREE.Mesh( new THREE.PlaneGeometry( 20, 20 ), tmat( 0x5a8a3c ) );
+		// Grass ground — plot of land
+		const ground = new THREE.Mesh( new THREE.PlaneGeometry( 28, 28 ), tmat( 0x5a8a3c ) );
 		ground.rotation.x = - Math.PI / 2;
 		ground.name = 'ground';
 		sceneRoot.add( ground );
 
-		// Dirt path
-		const pathMesh = new THREE.Mesh( new THREE.BoxGeometry( 1.4, 0.02, 10 ), tmat( 0xa0785a, 1.0 ) );
-		pathMesh.position.set( 0, 0.01, 0 );
-		pathMesh.name = 'path';
+		// Road shoulder
+		const shoulder = new THREE.Mesh( new THREE.BoxGeometry( 3.2, 0.015, 14 ), tmat( 0xb8956a, 1.0 ) );
+		shoulder.position.set( 0, 0.008, 0 );
+		shoulder.name = 'shoulder';
+		sceneRoot.add( shoulder );
+
+		// Dusty road surface
+		const pathMesh = new THREE.Mesh( new THREE.BoxGeometry( 2.2, 0.02, 14 ), tmat( 0xc4a882, 1.0 ) );
+		pathMesh.position.set( 0, 0.012, 0 );
+		pathMesh.name = 'road';
 		sceneRoot.add( pathMesh );
+
+		// Worn wheel tracks
+		[ - 0.55, 0.55 ].forEach( x => {
+			const track = new THREE.Mesh( new THREE.BoxGeometry( 0.18, 0.021, 14 ), tmat( 0xa8906a, 1.0 ) );
+			track.position.set( x, 0.013, 0 );
+			sceneRoot.add( track );
+		} );
 
 		// ── Character ────────────────────────────────────────────────────
 		function cmat( color ) {
@@ -605,6 +618,67 @@ function MenubarAdd( editor ) {
 		] );
 
 		sceneRoot.animations = [ walkClip ];
+
+		// ── Dust puff pool ────────────────────────────────────────────────
+		const POOL_SIZE = 6, PPP = 6;
+		const dustMat = new THREE.MeshStandardMaterial( { color: 0xd4b896, transparent: true, opacity: 0, roughness: 1, depthWrite: false } );
+		const puffPool = [];
+		for ( let p = 0; p < POOL_SIZE; p ++ ) {
+			const puff = new THREE.Group(); puff.name = 'dustPuff'; puff.visible = false;
+			for ( let i = 0; i < PPP; i ++ ) {
+				const m = new THREE.Mesh( new THREE.SphereGeometry( 0.07 + Math.random() * 0.05, 4, 4 ), dustMat.clone() );
+				const angle = ( i / PPP ) * Math.PI * 2 + Math.random() * 0.5;
+				m.userData.vx = Math.cos( angle ) * ( 0.6 + Math.random() * 0.4 );
+				m.userData.vz = Math.sin( angle ) * ( 0.6 + Math.random() * 0.4 );
+				m.userData.vy = 0.8 + Math.random() * 0.6;
+				puff.add( m );
+			}
+			sceneRoot.add( puff );
+			puffPool.push( { group: puff, life: 0, active: false } );
+		}
+		let poolIdx = 0;
+
+		function spawnDust( x, z ) {
+			const e = puffPool[ poolIdx ++ % POOL_SIZE ];
+			e.active = true; e.life = 0;
+			e.group.visible = true;
+			e.group.position.set( x, 0, z );
+			e.group.children.forEach( m => {
+				m.position.set( ( Math.random() - 0.5 ) * 0.15, 0.05, ( Math.random() - 0.5 ) * 0.15 );
+				m.material.opacity = 0.75; m.scale.setScalar( 1 );
+			} );
+		}
+
+		// Hook into editor's animation loop via mixer update event
+		let prevLA = 0, prevRA = 0, dustTime = 0;
+		const PUFF_DUR = 0.55;
+		editor.mixer.addEventListener( 'loop', () => {} ); // ensure mixer is active
+
+		// Patch: use a per-frame callback via sceneRoot userData
+		sceneRoot.userData.onUpdate = function ( delta ) {
+			dustTime += delta;
+			const phase = ( ( dustTime % D ) / D ) * Math.PI * 2;
+			const la = 0.4 * Math.sin( phase + Math.PI );
+			const ra = 0.4 * Math.sin( phase );
+			if ( prevLA > 0.05 && la <= 0.05 ) spawnDust( walker.position.x - 0.14, walker.position.z );
+			if ( prevRA > 0.05 && ra <= 0.05 ) spawnDust( walker.position.x + 0.14, walker.position.z );
+			prevLA = la; prevRA = ra;
+			puffPool.forEach( e => {
+				if ( ! e.active ) return;
+				e.life += delta;
+				const t = e.life / PUFF_DUR;
+				if ( t >= 1 ) { e.active = false; e.group.visible = false; return; }
+				const ease = 1 - t * t;
+				e.group.children.forEach( m => {
+					m.position.x += m.userData.vx * delta * ease;
+					m.position.y += m.userData.vy * delta * ease;
+					m.position.z += m.userData.vz * delta * ease;
+					const s = t < 0.3 ? t / 0.3 : 1 - ( t - 0.3 ) / 0.7;
+					m.scale.setScalar( s * 1.4 );
+					m.material.opacity = t < 0.4 ? 0.75 : 0.75 * ( 1 - ( t - 0.4 ) / 0.6 );
+				} );
+			} );
+		};
 
 		// Lights
 		const hasLight = editor.scene.children.some( c => c.isLight );

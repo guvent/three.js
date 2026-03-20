@@ -14,7 +14,7 @@
 
 ## Animations
 - [x] Walk clip (D=2s, N=17) — bob Y + head nod + arm/leg swing
-- [x] Path traversal — character walks Z axis between -4.5 and +4.5, flips on turnaround
+- [x] Path traversal — character walks Z axis between -6 and +6, flips on turnaround
 
 ## Shadows
 - [x] All meshes set `castShadow = true` + `receiveShadow = true` via `root.traverse`

@@ -33,7 +33,7 @@
 			// ── Scene & Camera ────────────────────────────────────────────
 			const scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0x87ceeb );
-			scene.fog = new THREE.Fog( 0x87ceeb, 20, 40 );
+			scene.fog = new THREE.Fog( 0x87ceeb, 22, 45 );
 
 			const camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
 			camera.position.set( 0, 5, 10 );
@@ -46,21 +46,19 @@
 			// ── Lights ────────────────────────────────────────────────────
 			scene.add( new THREE.AmbientLight( 0xffffff, 0.8 ) );
 
-			// Angled sun — wide soft shadow across the whole scene
 			const sun = new THREE.DirectionalLight( 0xfff0cc, 1.2 );
 			sun.position.set( 5, 10, 5 );
 			sun.castShadow = true;
 			sun.shadow.mapSize.set( 1024, 1024 );
 			sun.shadow.camera.near = 0.5;
 			sun.shadow.camera.far = 30;
-			sun.shadow.camera.left = - 8;
-			sun.shadow.camera.right = 8;
-			sun.shadow.camera.top = 8;
-			sun.shadow.camera.bottom = - 8;
+			sun.shadow.camera.left = - 10;
+			sun.shadow.camera.right = 10;
+			sun.shadow.camera.top = 10;
+			sun.shadow.camera.bottom = - 10;
 			sun.shadow.bias = - 0.001;
 			scene.add( sun );
 
-			// Overhead spot — follows the character, casts a crisp shadow directly below
 			const overheadSpot = new THREE.SpotLight( 0xffffff, 3, 12, Math.PI / 6, 0.4, 1 );
 			overheadSpot.castShadow = true;
 			overheadSpot.shadow.mapSize.set( 512, 512 );
@@ -70,24 +68,62 @@
 			scene.add( overheadSpot );
 			scene.add( overheadSpot.target );
 
-			// ── Terrain ───────────────────────────────────────────────────
-			// Grass ground
+			// ── Terrain — Plot of Land ────────────────────────────────────
+			// Large grass ground
 			const ground = new THREE.Mesh(
-				new THREE.PlaneGeometry( 20, 20 ),
+				new THREE.PlaneGeometry( 28, 28 ),
 				new THREE.MeshToonMaterial( { color: 0x5a8a3c } )
 			);
 			ground.rotation.x = - Math.PI / 2;
 			ground.receiveShadow = true;
 			scene.add( ground );
 
-			// Dirt path — a flat box slightly above ground, running along Z axis
-			const path = new THREE.Mesh(
-				new THREE.BoxGeometry( 1.4, 0.02, 10 ),
-				new THREE.MeshToonMaterial( { color: 0xa0785a } )
+			// Road shoulders (packed earth, slightly lighter than road)
+			const shoulderMat = new THREE.MeshToonMaterial( { color: 0xb8956a } );
+			const shoulder = new THREE.Mesh(
+				new THREE.BoxGeometry( 3.2, 0.015, 14 ),
+				shoulderMat
 			);
-			path.position.set( 0, 0.01, 0 );
-			path.receiveShadow = true;
-			scene.add( path );
+			shoulder.position.set( 0, 0.008, 0 );
+			shoulder.receiveShadow = true;
+			scene.add( shoulder );
+
+			// Road surface — dusty dirt road
+			const roadMat = new THREE.MeshToonMaterial( { color: 0xc4a882 } );
+			const road = new THREE.Mesh(
+				new THREE.BoxGeometry( 2.2, 0.02, 14 ),
+				roadMat
+			);
+			road.position.set( 0, 0.012, 0 );
+			road.receiveShadow = true;
+			scene.add( road );
+
+			// Road edge lines (faint worn tracks)
+			const trackMat = new THREE.MeshToonMaterial( { color: 0xa8906a } );
+			[ - 0.55, 0.55 ].forEach( x => {
+				const track = new THREE.Mesh(
+					new THREE.BoxGeometry( 0.18, 0.021, 14 ),
+					trackMat
+				);
+				track.position.set( x, 0.013, 0 );
+				track.receiveShadow = true;
+				scene.add( track );
+			} );
+
+			// Scattered dust patches on road surface
+			const dustPatchMat = new THREE.MeshToonMaterial( { color: 0xd4b896, transparent: true, opacity: 0.5 } );
+			const patchPositions = [
+				[ 0.3, 1.5 ], [ - 0.4, - 0.8 ], [ 0.1, 3.2 ], [ - 0.2, - 3.0 ],
+				[ 0.5, - 1.5 ], [ - 0.3, 2.8 ], [ 0.2, - 4.2 ], [ - 0.5, 4.0 ]
+			];
+			patchPositions.forEach( ( [ x, z ] ) => {
+				const patch = new THREE.Mesh(
+					new THREE.CylinderGeometry( 0.22 + Math.random() * 0.15, 0.28 + Math.random() * 0.1, 0.005, 8 ),
+					dustPatchMat
+				);
+				patch.position.set( x, 0.022, z );
+				scene.add( patch );
+			} );
 
 			// ── Character helpers ─────────────────────────────────────────
 			function mat( color ) {
@@ -99,23 +135,18 @@
 			root.name = 'Walker';
 			root.position.set( 0, 1, 0 );
 
-			// Body
 			root.add( new THREE.Mesh( new THREE.CapsuleGeometry( 0.28, 0.5, 8, 16 ), mat( 0xe63946 ) ) );
 
-			// Neck
 			const neck = new THREE.Mesh( new THREE.CylinderGeometry( 0.08, 0.1, 0.15, 12 ), mat( 0xf4c07a ) );
 			neck.position.y = 0.45;
 			root.add( neck );
 
-			// Head group
 			const headGroup = new THREE.Group();
 			headGroup.name = 'head';
 			headGroup.position.y = 0.75;
 			root.add( headGroup );
-
 			headGroup.add( new THREE.Mesh( new THREE.SphereGeometry( 0.28, 32, 32 ), mat( 0xf4c07a ) ) );
 
-			// Hair
 			const hair = new THREE.Mesh(
 				new THREE.SphereGeometry( 0.29, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.45 ),
 				mat( 0x3d2b1f )
@@ -123,14 +154,12 @@
 			hair.position.y = 0.05;
 			headGroup.add( hair );
 
-			// Eyes
 			[ - 0.1, 0.1 ].forEach( x => {
 				const eye = new THREE.Mesh( new THREE.SphereGeometry( 0.04, 16, 16 ), mat( 0x1d3557 ) );
 				eye.position.set( x, 0.05, 0.25 );
 				headGroup.add( eye );
 			} );
 
-			// Arms
 			const armGeo = new THREE.CapsuleGeometry( 0.07, 0.35, 8, 12 );
 
 			const leftArm = new THREE.Group();
@@ -138,24 +167,19 @@
 			leftArm.position.set( - 0.38, 0.28, 0 );
 			root.add( leftArm );
 			const lArmMesh = new THREE.Mesh( armGeo, mat( 0xe63946 ) );
-			lArmMesh.position.y = - 0.22;
-			leftArm.add( lArmMesh );
+			lArmMesh.position.y = - 0.22; leftArm.add( lArmMesh );
 			const lHand = new THREE.Mesh( new THREE.SphereGeometry( 0.07, 12, 12 ), mat( 0xf4c07a ) );
-			lHand.position.y = - 0.48;
-			leftArm.add( lHand );
+			lHand.position.y = - 0.48; leftArm.add( lHand );
 
 			const rightArm = new THREE.Group();
 			rightArm.name = 'rightArm';
 			rightArm.position.set( 0.38, 0.28, 0 );
 			root.add( rightArm );
 			const rArmMesh = new THREE.Mesh( armGeo, mat( 0xe63946 ) );
-			rArmMesh.position.y = - 0.22;
-			rightArm.add( rArmMesh );
+			rArmMesh.position.y = - 0.22; rightArm.add( rArmMesh );
 			const rHand = new THREE.Mesh( new THREE.SphereGeometry( 0.07, 12, 12 ), mat( 0xf4c07a ) );
-			rHand.position.y = - 0.48;
-			rightArm.add( rHand );
+			rHand.position.y = - 0.48; rightArm.add( rHand );
 
-			// Legs
 			const legGeo = new THREE.CapsuleGeometry( 0.09, 0.4, 8, 12 );
 
 			const leftLeg = new THREE.Group();
@@ -163,8 +187,7 @@
 			leftLeg.position.set( - 0.14, - 0.45, 0 );
 			root.add( leftLeg );
 			const lLegMesh = new THREE.Mesh( legGeo, mat( 0x457b9d ) );
-			lLegMesh.position.y = - 0.25;
-			leftLeg.add( lLegMesh );
+			lLegMesh.position.y = - 0.25; leftLeg.add( lLegMesh );
 			const lShoe = new THREE.Mesh( new THREE.CapsuleGeometry( 0.08, 0.14, 8, 8 ), mat( 0x1d3557 ) );
 			lShoe.rotation.x = Math.PI / 2;
 			lShoe.position.set( - 0.03, - 0.52, 0.05 );
@@ -175,21 +198,15 @@
 			rightLeg.position.set( 0.14, - 0.45, 0 );
 			root.add( rightLeg );
 			const rLegMesh = new THREE.Mesh( legGeo, mat( 0x457b9d ) );
-			rLegMesh.position.y = - 0.25;
-			rightLeg.add( rLegMesh );
+			rLegMesh.position.y = - 0.25; rightLeg.add( rLegMesh );
 			const rShoe = new THREE.Mesh( new THREE.CapsuleGeometry( 0.08, 0.14, 8, 8 ), mat( 0x1d3557 ) );
 			rShoe.rotation.x = Math.PI / 2;
 			rShoe.position.set( 0.03, - 0.52, 0.05 );
 			rightLeg.add( rShoe );
 
 			scene.add( root );
-
-			// Enable shadow casting/receiving on every character mesh
 			root.traverse( child => {
-				if ( child.isMesh ) {
-					child.castShadow = true;
-					child.receiveShadow = true;
-				}
+				if ( child.isMesh ) { child.castShadow = true; child.receiveShadow = true; }
 			} );
 
 			// ── Walk animation clip ───────────────────────────────────────
@@ -221,9 +238,68 @@
 			const mixer = new THREE.AnimationMixer( root );
 			mixer.clipAction( walkClip ).play();
 
+			// ── Dust FX pool ──────────────────────────────────────────────
+			// Each puff: 6 tiny spheres that scatter outward, rise, and fade
+			const POOL_SIZE = 6;
+			const PARTICLES_PER_PUFF = 6;
+			const dustMat = new THREE.MeshToonMaterial( {
+				color: 0xd4b896,
+				transparent: true,
+				opacity: 0.0,
+				depthWrite: false
+			} );
+
+			// Build pool of reusable puff groups
+			const puffPool = [];
+			for ( let p = 0; p < POOL_SIZE; p ++ ) {
+				const puff = new THREE.Group();
+				puff.visible = false;
+				for ( let i = 0; i < PARTICLES_PER_PUFF; i ++ ) {
+					const m = new THREE.Mesh(
+						new THREE.SphereGeometry( 0.07 + Math.random() * 0.05, 4, 4 ),
+						dustMat.clone()
+					);
+					// Random outward direction in XZ
+					const angle = ( i / PARTICLES_PER_PUFF ) * Math.PI * 2 + Math.random() * 0.5;
+					m.userData.vx = Math.cos( angle ) * ( 0.6 + Math.random() * 0.4 );
+					m.userData.vz = Math.sin( angle ) * ( 0.6 + Math.random() * 0.4 );
+					m.userData.vy = 0.8 + Math.random() * 0.6;
+					puff.add( m );
+				}
+				scene.add( puff );
+				puffPool.push( { group: puff, life: 0, active: false } );
+			}
+
+			let poolIndex = 0;
+
+			function spawnDustPuff( x, z ) {
+				const entry = puffPool[ poolIndex % POOL_SIZE ];
+				poolIndex ++;
+				entry.active = true;
+				entry.life = 0;
+				const puff = entry.group;
+				puff.visible = true;
+				puff.children.forEach( m => {
+					m.position.set(
+						( Math.random() - 0.5 ) * 0.15,
+						0.05,
+						( Math.random() - 0.5 ) * 0.15
+					);
+					m.material.opacity = 0.75;
+					m.scale.setScalar( 1 );
+				} );
+				puff.position.set( x, 0, z );
+			}
+
+			// ── Footstep timing ───────────────────────────────────────────
+			// Walk cycle: left foot hits at phase 0 (t=0), right foot at phase π (t=1s)
+			// We detect zero-crossings of the leg swing to fire puffs
+			let prevLeftAngle = 0;
+			let prevRightAngle = 0;
+
 			// ── Walk along path ───────────────────────────────────────────
-			const PATH_HALF = 4.5;   // walk between Z = -4.5 and +4.5
-			const WALK_SPEED = 2;    // units per second
+			const PATH_HALF = 6;
+			const WALK_SPEED = 2;
 			let walkDir = 1;
 
 			// ── Resize ────────────────────────────────────────────────────
@@ -235,23 +311,70 @@
 
 			// ── Render loop ───────────────────────────────────────────────
 			const clock = new THREE.Clock();
+			let mixerTime = 0;
+
 			renderer.setAnimationLoop( () => {
 				const delta = clock.getDelta();
 				mixer.update( delta );
+				mixerTime += delta;
 
-				// Move character along path
+				// ── Move character along path ─────────────────────────────
 				root.position.z += walkDir * WALK_SPEED * delta;
 				if ( root.position.z > PATH_HALF ) {
 					root.position.z = PATH_HALF;
 					walkDir = - 1;
-					root.rotation.y = Math.PI; // face the other way
+					root.rotation.y = Math.PI;
 				} else if ( root.position.z < - PATH_HALF ) {
 					root.position.z = - PATH_HALF;
 					walkDir = 1;
 					root.rotation.y = 0;
 				}
 
-				// Keep overhead spot directly above the character
+				// ── Footstep detection via leg swing zero-crossing ────────
+				// Leg swing angle = amplitude * sin(phase)
+				const phase = ( ( mixerTime % D ) / D ) * Math.PI * 2;
+				const leftAngle  = 0.4 * Math.sin( phase + Math.PI ); // leftLeg phase=π
+				const rightAngle = 0.4 * Math.sin( phase );            // rightLeg phase=0
+
+				// Left foot strikes ground when angle crosses 0 going negative (foot forward→back)
+				if ( prevLeftAngle > 0.05 && leftAngle <= 0.05 ) {
+					const wx = root.position.x + ( walkDir > 0 ? - 0.14 : 0.14 );
+					spawnDustPuff( wx - 0.14, root.position.z );
+				}
+				// Right foot
+				if ( prevRightAngle > 0.05 && rightAngle <= 0.05 ) {
+					const wx = root.position.x + ( walkDir > 0 ? 0.14 : - 0.14 );
+					spawnDustPuff( wx + 0.14, root.position.z );
+				}
+				prevLeftAngle  = leftAngle;
+				prevRightAngle = rightAngle;
+
+				// ── Animate active dust puffs ─────────────────────────────
+				const PUFF_DURATION = 0.55;
+				puffPool.forEach( entry => {
+					if ( ! entry.active ) return;
+					entry.life += delta;
+					const t = entry.life / PUFF_DURATION; // 0→1
+					if ( t >= 1 ) {
+						entry.active = false;
+						entry.group.visible = false;
+						return;
+					}
+					// Ease out: fast start, slow end
+					const ease = 1 - t * t;
+					entry.group.children.forEach( m => {
+						m.position.x += m.userData.vx * delta * ease;
+						m.position.y += m.userData.vy * delta * ease;
+						m.position.z += m.userData.vz * delta * ease;
+						// Scale up then shrink
+						const s = t < 0.3 ? t / 0.3 : 1 - ( t - 0.3 ) / 0.7;
+						m.scale.setScalar( s * 1.4 );
+						// Fade out in second half
+						m.material.opacity = t < 0.4 ? 0.75 : 0.75 * ( 1 - ( t - 0.4 ) / 0.6 );
+					} );
+				} );
+
+				// ── Overhead spot tracks character ────────────────────────
 				overheadSpot.position.set( root.position.x, root.position.y + 5, root.position.z );
 				overheadSpot.target.position.set( root.position.x, 0, root.position.z );
 				overheadSpot.target.updateMatrixWorld();
