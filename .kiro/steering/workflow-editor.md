@@ -24,19 +24,23 @@ Just describe what you need in plain language:
 - "Make a torch with flickering flame"
 
 Kiro will pick the right role, build the asset, and deliver:
-1. An entry in `Add` menu of the editor (`editor/js/Menubar.Add.js`)
-2. A standalone preview at `examples/misc_<name>.html`
+1. An entry in the `Add` menu of the editor (`editor/js/Menubar.Add.js`) — **always required**
+2. A standalone preview at `examples/misc_<name>.html` — **always required**
+
+Both deliverables are mandatory for every asset. The editor entry lets you interact with the asset in the Three.js editor viewport. The standalone preview lets you inspect it in isolation. Neither is optional.
 
 ## Hard Rules (apply to every asset)
 
 - **Never touch `src/`** — no changes to Three.js core source files
-- **Editor assets go in `editor/js/Menubar.Add.js`** — new `option` block before `return container`
+- **Editor assets go in `editor/js/Menubar.Add.js`** — new `option` block before `return container`; this is MANDATORY for every asset, not optional
+- **Standalone preview required** — every asset also gets `examples/misc_<name>.html` using `MeshToonMaterial`
 - **`MeshStandardMaterial` in editor** — works with default environment lighting
 - **`MeshToonMaterial` in standalone previews** — clean game-art look
 - **Auto-add lights** — check `editor.scene.children.some(c => c.isLight)` first; if false, add `AmbientLight(0xffffff, 1.5)` + `DirectionalLight(0xfff0cc, 2)` at `(5, 10, 5)` via `AddObjectCommand`
 - **Always use `editor.execute(new AddObjectCommand(editor, object))`** — never `scene.add()` directly
 - **Animate via `editor.mixer`** — `AnimationClip` + `editor.mixer.clipAction(clip, root).play()`
 - **No bundling** — static file server only; use the `three` importmap
+- **Server**: run `yarn start` to serve at `http://localhost:8080`; editor at `http://localhost:8080/editor/`; previews at `http://localhost:8080/examples/misc_<name>.html`
 
 ## Animation Helpers (shared across all roles)
 
@@ -153,13 +157,15 @@ One sentence describing the asset.
 
 ## Delivery Checklist
 
+- [ ] `editor/js/Menubar.Add.js` — Add menu entry added (MANDATORY)
+- [ ] `examples/misc_<name>.html` — standalone preview created (MANDATORY)
 - [ ] Named sub-groups match AnimationClip track paths exactly
 - [ ] `MeshStandardMaterial` used in editor version
+- [ ] `MeshToonMaterial` used in standalone preview
 - [ ] Lights auto-added when scene has none
 - [ ] `AddObjectCommand` used for every scene addition
 - [ ] `editor.mixer.clipAction(clip, root).play()` called after adding to scene
 - [ ] No new imports added to `Menubar.Add.js`
 - [ ] No changes to `src/`
-- [ ] Standalone `examples/misc_<name>.html` created
 - [ ] `tasks.md` created and all items marked complete
 - [ ] `design.md` created documenting geometry, materials, animations
