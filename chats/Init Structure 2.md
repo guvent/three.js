@@ -1,6 +1,6 @@
 # Could you run it in your browser and examine it? (Continued)
 
-Exported: 3/20/2026, 5:56:30 PM
+Exported: 3/20/2026, 6:21:57 PM
 
 ## Steering Documents
 
@@ -257,5 +257,71 @@ Everything checks out. Both assets have their deliverables:
 - `Walking Scene` → `editor/js/Menubar.Add.js` ✓ + `examples/misc_walking_scene.html` ✓
 
 All spec folders have both `tasks.md` and `design.md`. Nothing to flag.
+
+---
+
+**User:**
+
+Great job!
+Now let's take our ./kiro directory structure to the next level.
+| Asset type | Spec location |
+|------------|--------------|
+| Character | `.kiro/specs/characters/<asset-name>/` |
+| Prop / Decoration | `.kiro/specs/props/<asset-name>/` |
+| Terrain / Ground | `.kiro/specs/terrain/<asset-name>/` |
+| FX / Ornament | `.kiro/specs/fx/<asset-name>/` |
+| Animation set | `.kiro/specs/animations/<asset-name>/` |
+This structure should be created in separate directories under the desired operation in each chat.
+| Asset type | Spec location |
+|------------|--------------|
+| Character | `.kiro/specs/<work_name>/characters/<asset-name>/` |
+| Prop / Decoration | `.kiro/specs/<work_name>/props/<asset-name>/` |
+| Terrain / Ground | `.kiro/specs/<work_name>/terrain/<asset-name>/` |
+| FX / Ornament | `.kiro/specs/<work_name>/fx/<asset-name>/` |
+| Animation set | `.kiro/specs/<work_name>/animations/<asset-name>/` |
+You can remove contents from the current directory structure; I will create new ones in the chat after making new attempts. It's important to update steering, our rules, and hooks.
+Our goal with the file structure is to be able to develop each added object separately in each scenario we create, and to allow easy access to existing work in each new conversation without mixing it with new work development processes through updates.
+We will do many more wonderful things together.
+
+---
+
+**Assistant:**
+
+Let me load the steering context and current specs first, then make all the changes.
+
+Good. Now I have the full picture. The plan:
+
+1. Clear all existing spec content (you'll recreate via new chats)
+2. Update `workflow-editor.md` with the new `<work_name>` path structure
+3. Update both hooks to use the new structure
+4. Update `README.md` steering reference
+
+Let's do it all in parallel.
+
+Good. Now update `workflow-editor.md` with the new path structure:
+
+Now update the "When to update specs" section and delivery checklist to reference `<work_name>`:
+
+Now update the delivery checklist:
+
+Now update both hooks:
+
+Now update the `README.md` steering quick reference:
+
+All done. Here's what changed:
+
+`workflow-editor.md` — spec paths now use `.kiro/specs/<work_name>/<category>/<asset-name>/`. Added a rule explaining how to determine `<work_name>` (short slug, one per session, ask user if not obvious from context).
+
+`load-steering-on-start` hook — now scans existing `<work_name>` folders at session start and asks you to name the new session so specs land in the right place.
+
+`sync-specs-on-stop` hook — now enforces the `<work_name>` path and flags any spec that would accidentally land in the old flat structure.
+
+`README.md` — updated with the new tree layout and work name conventions.
+
+Old flat spec content cleared. Next time you start a chat and say "let's build a forest level", everything will go into `.kiro/specs/forest-level/`.
+
+The old flat folders are empty shells left over from the delete. No `<work_name>` folders exist yet — that's correct, you'll create those in new chats. Nothing was built this session (only structural/steering changes were made), so no new specs are needed.
+
+One thing to flag: the empty legacy folders (`characters/puppet-character`, `characters/walker`, `terrain/walking-scene`, `fx/footstep-dust`) are still sitting there. They're harmless but cluttered. Want me to remove them so `.kiro/specs/` starts completely clean?
 
 ---
