@@ -83,17 +83,24 @@ function pulseTrack(name, base, amplitude) {
 ## Spec Tracking — Required for Every Asset
 
 Every asset built MUST have a corresponding spec folder created or updated in `.kiro/specs/`.
-This keeps a living record of everything built and makes assets repeatable across sessions.
+Specs are grouped by **work name** — a short slug describing the session or scenario (e.g. `walking-scene`, `coin-collect`, `goblin-boss`).
+This keeps each work session isolated so new work never mixes with previous work.
+
+### How to determine `<work_name>`
+
+- At the start of a new chat, ask the user: "What should we call this work session?" if no name is obvious from context.
+- Use a short lowercase slug: `walking-scene`, `forest-level`, `ui-fx`, `goblin-enemy`, etc.
+- All assets built in the same chat session share the same `<work_name>`.
 
 ### Folder mapping
 
 | Asset type | Spec location |
 |------------|--------------|
-| Character | `.kiro/specs/characters/<asset-name>/` |
-| Prop / Decoration | `.kiro/specs/props/<asset-name>/` |
-| Terrain / Ground | `.kiro/specs/terrain/<asset-name>/` |
-| FX / Ornament | `.kiro/specs/fx/<asset-name>/` |
-| Animation set | `.kiro/specs/animations/<asset-name>/` |
+| Character | `.kiro/specs/<work_name>/characters/<asset-name>/` |
+| Prop / Decoration | `.kiro/specs/<work_name>/props/<asset-name>/` |
+| Terrain / Ground | `.kiro/specs/<work_name>/terrain/<asset-name>/` |
+| FX / Ornament | `.kiro/specs/<work_name>/fx/<asset-name>/` |
+| Animation set | `.kiro/specs/<work_name>/animations/<asset-name>/` |
 
 ### Files to create in each spec folder
 
@@ -148,10 +155,12 @@ One sentence describing the asset.
 
 ### When to update specs
 
-- **New asset requested** → create `tasks.md` immediately, mark items as you go
-- **Asset delivered** → mark all tasks `[x]`, create `design.md`
+- **New chat / new work session** → confirm `<work_name>` with user (or infer from context), use it for all specs in this session
+- **New asset requested** → create `tasks.md` immediately at `.kiro/specs/<work_name>/<category>/<asset-name>/`, mark items as you go
+- **Asset delivered** → mark all tasks `[x]`, create `design.md` in the same folder
 - **Animation added to existing asset** → update the asset's `tasks.md` and `design.md`
 - **Bug fixed on existing asset** → add a note to `design.md` under a `## Fixes` section
+- **Never mix assets from different sessions** → each `<work_name>` folder is its own isolated unit
 
 ---
 
@@ -167,5 +176,5 @@ One sentence describing the asset.
 - [ ] `editor.mixer.clipAction(clip, root).play()` called after adding to scene
 - [ ] No new imports added to `Menubar.Add.js`
 - [ ] No changes to `src/`
-- [ ] `tasks.md` created and all items marked complete
-- [ ] `design.md` created documenting geometry, materials, animations
+- [ ] `tasks.md` created at `.kiro/specs/<work_name>/<category>/<asset-name>/` and all items marked complete
+- [ ] `design.md` created in the same folder documenting geometry, materials, animations

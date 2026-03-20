@@ -8,6 +8,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Review what was built or modified in this session. For every asset that was created or changed (characters, props, terrain, FX, animations): 1) Check that BOTH editor/js/Menubar.Add.js entry AND examples/misc_<name>.html exist — if either is missing, flag it to the user. 2) Check if a corresponding spec folder exists in .kiro/specs/<category>/<asset-name>/. If tasks.md or design.md are missing or outdated, create or update them following the templates in workflow-editor.md. Do this silently unless there is something to report or flag."
+    "prompt": "Review what was built or modified in this session. For every asset that was created or changed (characters, props, terrain, FX, animations): 1) Check that BOTH editor/js/Menubar.Add.js entry AND examples/misc_<name>.html exist — if either is missing, flag it to the user. 2) Check if a corresponding spec folder exists at .kiro/specs/<work_name>/<category>/<asset-name>/. If tasks.md or design.md are missing or outdated, create or update them following the templates in workflow-editor.md. All specs for this session must live under the same <work_name> folder — never in the flat old-style .kiro/specs/<category>/ path. Do this silently unless there is something to report or flag."
   }
 }

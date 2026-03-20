@@ -34,16 +34,32 @@ Just describe what you need. Kiro reads the role files automatically and picks t
 
 ## Specs Directory Structure
 
+Every chat session gets its own `<work_name>` folder. All assets built in that session live under it.
+
 ```
 .kiro/specs/
-  characters/        ← one folder per character built
-  props/             ← one folder per prop built
-  terrain/           ← one folder per terrain piece built
-  fx/                ← one folder per FX asset built
-  animations/        ← one folder per animation set built
+  <work_name>/              ← one folder per chat session / scenario
+    characters/             ← characters built in this session
+      <asset-name>/
+        tasks.md
+        design.md
+    props/                  ← props built in this session
+      <asset-name>/
+    terrain/                ← terrain built in this session
+      <asset-name>/
+    fx/                     ← FX built in this session
+      <asset-name>/
+    animations/             ← animation sets built in this session
+      <asset-name>/
 ```
 
-Each spec folder contains:
-- `design.md` — geometry, materials, animation design
-- `requirements.md` — what the asset must do
-- `tasks.md` — implementation checklist
+### Work name conventions
+
+- Short lowercase slug: `walking-scene`, `forest-level`, `coin-collect`, `goblin-boss`
+- Matches the theme or goal of the chat session
+- Kiro will ask you at the start of each session if it's not obvious from context
+
+### Browsing past work
+
+Each `<work_name>` folder is a self-contained record of one session.
+Open any `design.md` to see exactly what was built and how to reproduce it.
