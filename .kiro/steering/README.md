@@ -1,5 +1,6 @@
 ---
 inclusion: manual
+description: Quick reference guide for steering files and spec categories — manually include with #README in chat.
 ---
 
 # Steering & Specs — Quick Reference

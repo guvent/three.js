@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Load Steering on Chat Start",
+  "description": "At the start of every chat, activates the workflow-editor steering file so all hard rules, animation helpers, and spec tracking requirements are loaded into context.",
+  "version": "1",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "This is a new chat session. Before doing anything else, activate the following steering files to load your rules into context: workflow-editor, role-characters, role-props, role-terrain, role-fx, role-animation. Then check .kiro/specs/ to understand what assets have already been built. Do this silently — no need to report back unless the user asked a question."
+  }
+}

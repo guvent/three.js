@@ -503,6 +503,124 @@ function MenubarAdd( editor ) {
 	} );
 	cameraSubmenu.add( option );
 
+	// Walking Scene
+
+	option = new UIRow();
+	option.setClass( 'option' );
+	option.setTextContent( 'Walking Scene' );
+	option.onClick( function () {
+
+		// ── Terrain ──────────────────────────────────────────────────────
+		const sceneRoot = new THREE.Group();
+		sceneRoot.name = 'WalkingScene';
+
+		function tmat( color, roughness = 0.9 ) {
+			return new THREE.MeshStandardMaterial( { color, roughness, metalness: 0 } );
+		}
+
+		// Grass ground
+		const ground = new THREE.Mesh( new THREE.PlaneGeometry( 20, 20 ), tmat( 0x5a8a3c ) );
+		ground.rotation.x = - Math.PI / 2;
+		ground.name = 'ground';
+		sceneRoot.add( ground );
+
+		// Dirt path
+		const pathMesh = new THREE.Mesh( new THREE.BoxGeometry( 1.4, 0.02, 10 ), tmat( 0xa0785a, 1.0 ) );
+		pathMesh.position.set( 0, 0.01, 0 );
+		pathMesh.name = 'path';
+		sceneRoot.add( pathMesh );
+
+		// ── Character ────────────────────────────────────────────────────
+		function cmat( color ) {
+			return new THREE.MeshStandardMaterial( { color, roughness: 0.8, metalness: 0 } );
+		}
+
+		const walker = new THREE.Group();
+		walker.name = 'walker';
+		walker.position.set( 0, 1, 0 );
+
+		walker.add( new THREE.Mesh( new THREE.CapsuleGeometry( 0.28, 0.5, 8, 16 ), cmat( 0xe63946 ) ) );
+
+		const neck = new THREE.Mesh( new THREE.CylinderGeometry( 0.08, 0.1, 0.15, 12 ), cmat( 0xf4c07a ) );
+		neck.position.y = 0.45;
+		walker.add( neck );
+
+		const headGroup = new THREE.Group();
+		headGroup.name = 'head';
+		headGroup.position.y = 0.75;
+		walker.add( headGroup );
+		headGroup.add( new THREE.Mesh( new THREE.SphereGeometry( 0.28, 32, 32 ), cmat( 0xf4c07a ) ) );
+		const hair = new THREE.Mesh( new THREE.SphereGeometry( 0.29, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.45 ), cmat( 0x3d2b1f ) );
+		hair.position.y = 0.05;
+		headGroup.add( hair );
+		[ - 0.1, 0.1 ].forEach( x => {
+			const eye = new THREE.Mesh( new THREE.SphereGeometry( 0.04, 16, 16 ), cmat( 0x1d3557 ) );
+			eye.position.set( x, 0.05, 0.25 );
+			headGroup.add( eye );
+		} );
+
+		const armGeo = new THREE.CapsuleGeometry( 0.07, 0.35, 8, 12 );
+		const leftArm = new THREE.Group(); leftArm.name = 'leftArm'; leftArm.position.set( - 0.38, 0.28, 0 ); walker.add( leftArm );
+		const lAM = new THREE.Mesh( armGeo, cmat( 0xe63946 ) ); lAM.position.y = - 0.22; leftArm.add( lAM );
+		const lH = new THREE.Mesh( new THREE.SphereGeometry( 0.07, 12, 12 ), cmat( 0xf4c07a ) ); lH.position.y = - 0.48; leftArm.add( lH );
+
+		const rightArm = new THREE.Group(); rightArm.name = 'rightArm'; rightArm.position.set( 0.38, 0.28, 0 ); walker.add( rightArm );
+		const rAM = new THREE.Mesh( armGeo, cmat( 0xe63946 ) ); rAM.position.y = - 0.22; rightArm.add( rAM );
+		const rH = new THREE.Mesh( new THREE.SphereGeometry( 0.07, 12, 12 ), cmat( 0xf4c07a ) ); rH.position.y = - 0.48; rightArm.add( rH );
+
+		const legGeo = new THREE.CapsuleGeometry( 0.09, 0.4, 8, 12 );
+		const leftLeg = new THREE.Group(); leftLeg.name = 'leftLeg'; leftLeg.position.set( - 0.14, - 0.45, 0 ); walker.add( leftLeg );
+		const lLM = new THREE.Mesh( legGeo, cmat( 0x457b9d ) ); lLM.position.y = - 0.25; leftLeg.add( lLM );
+		const lS = new THREE.Mesh( new THREE.CapsuleGeometry( 0.08, 0.14, 8, 8 ), cmat( 0x1d3557 ) ); lS.rotation.x = Math.PI / 2; lS.position.set( - 0.03, - 0.52, 0.05 ); leftLeg.add( lS );
+
+		const rightLeg = new THREE.Group(); rightLeg.name = 'rightLeg'; rightLeg.position.set( 0.14, - 0.45, 0 ); walker.add( rightLeg );
+		const rLM = new THREE.Mesh( legGeo, cmat( 0x457b9d ) ); rLM.position.y = - 0.25; rightLeg.add( rLM );
+		const rS = new THREE.Mesh( new THREE.CapsuleGeometry( 0.08, 0.14, 8, 8 ), cmat( 0x1d3557 ) ); rS.rotation.x = Math.PI / 2; rS.position.set( 0.03, - 0.52, 0.05 ); rightLeg.add( rS );
+
+		sceneRoot.add( walker );
+
+		// ── Walk clip ────────────────────────────────────────────────────
+		const D = 2, N = 17;
+		const times = Array.from( { length: N }, ( _, i ) => ( i / ( N - 1 ) ) * D );
+
+		function sineQuatTrack( name, amplitude, phase ) {
+			const q = new THREE.Quaternion();
+			const axis = new THREE.Vector3( 1, 0, 0 );
+			const values = [];
+			for ( let i = 0; i < N; i ++ ) {
+				const angle = amplitude * Math.sin( ( times[ i ] / D ) * Math.PI * 2 + phase );
+				q.setFromAxisAngle( axis, angle );
+				values.push( q.x, q.y, q.z, q.w );
+			}
+			return new THREE.QuaternionKeyframeTrack( name, times, values );
+		}
+
+		const walkClip = new THREE.AnimationClip( 'WalkerWalk', D, [
+			new THREE.NumberKeyframeTrack( 'walker.position[y]', times, times.map( t => 1 + 0.08 * Math.sin( ( t / D ) * Math.PI * 2 ) ) ),
+			sineQuatTrack( 'walker/head.quaternion', 0.06, 0 ),
+			sineQuatTrack( 'walker/leftArm.quaternion', 0.6, 0 ),
+			sineQuatTrack( 'walker/rightArm.quaternion', 0.6, Math.PI ),
+			sineQuatTrack( 'walker/leftLeg.quaternion', 0.4, Math.PI ),
+			sineQuatTrack( 'walker/rightLeg.quaternion', 0.4, 0 ),
+		] );
+
+		sceneRoot.animations = [ walkClip ];
+
+		// Lights
+		const hasLight = editor.scene.children.some( c => c.isLight );
+		if ( ! hasLight ) {
+			const ambient = new THREE.AmbientLight( 0xffffff, 1.5 ); ambient.name = 'AmbientLight';
+			editor.execute( new AddObjectCommand( editor, ambient ) );
+			const dir = new THREE.DirectionalLight( 0xfff0cc, 2 ); dir.name = 'DirectionalLight'; dir.position.set( 5, 10, 5 );
+			editor.execute( new AddObjectCommand( editor, dir ) );
+		}
+
+		editor.execute( new AddObjectCommand( editor, sceneRoot ) );
+		editor.mixer.clipAction( walkClip, sceneRoot ).play();
+
+	} );
+	options.add( option );
+
 	// Puppet
 
 	option = new UIRow();

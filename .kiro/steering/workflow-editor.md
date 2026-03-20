@@ -76,6 +76,81 @@ function pulseTrack(name, base, amplitude) {
 }
 ```
 
+## Spec Tracking — Required for Every Asset
+
+Every asset built MUST have a corresponding spec folder created or updated in `.kiro/specs/`.
+This keeps a living record of everything built and makes assets repeatable across sessions.
+
+### Folder mapping
+
+| Asset type | Spec location |
+|------------|--------------|
+| Character | `.kiro/specs/characters/<asset-name>/` |
+| Prop / Decoration | `.kiro/specs/props/<asset-name>/` |
+| Terrain / Ground | `.kiro/specs/terrain/<asset-name>/` |
+| FX / Ornament | `.kiro/specs/fx/<asset-name>/` |
+| Animation set | `.kiro/specs/animations/<asset-name>/` |
+
+### Files to create in each spec folder
+
+**`tasks.md`** — created at the START of building an asset, updated as work progresses:
+
+```markdown
+# Tasks: <Asset Name>
+
+## Delivered files
+- [ ] `editor/js/Menubar.Add.js` — Add menu entry
+- [ ] `examples/misc_<name>.html` — standalone preview
+
+## Asset components
+- [ ] Root group + static meshes
+- [ ] Animatable sub-groups (named correctly)
+- [ ] Materials (MeshStandardMaterial)
+- [ ] AnimationClip + keyframe tracks
+- [ ] Lights auto-add guard
+- [ ] editor.mixer.clipAction.play()
+
+## Animations
+- [ ] <clip name> — <description>
+```
+
+Mark tasks `[x]` as each step is completed.
+
+**`design.md`** — created AFTER the asset is built, documents what was made:
+
+```markdown
+# Design: <Asset Name>
+
+## Category
+Character | Prop | Terrain | FX | Animation
+
+## Description
+One sentence describing the asset.
+
+## Geometry
+| Part | Geometry | Color |
+|------|----------|-------|
+| ...  | ...      | ...   |
+
+## Animations
+| Clip | Duration | Loop | Tracks |
+|------|----------|------|--------|
+| ...  | ...      | ...  | ...    |
+
+## Delivered files
+- `editor/js/Menubar.Add.js` — menu entry name: `<Name>`
+- `examples/misc_<name>.html` — standalone preview
+```
+
+### When to update specs
+
+- **New asset requested** → create `tasks.md` immediately, mark items as you go
+- **Asset delivered** → mark all tasks `[x]`, create `design.md`
+- **Animation added to existing asset** → update the asset's `tasks.md` and `design.md`
+- **Bug fixed on existing asset** → add a note to `design.md` under a `## Fixes` section
+
+---
+
 ## Delivery Checklist
 
 - [ ] Named sub-groups match AnimationClip track paths exactly
@@ -86,3 +161,5 @@ function pulseTrack(name, base, amplitude) {
 - [ ] No new imports added to `Menubar.Add.js`
 - [ ] No changes to `src/`
 - [ ] Standalone `examples/misc_<name>.html` created
+- [ ] `tasks.md` created and all items marked complete
+- [ ] `design.md` created documenting geometry, materials, animations

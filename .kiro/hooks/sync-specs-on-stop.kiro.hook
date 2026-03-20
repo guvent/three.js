@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Sync Spec Files After Delivery",
+  "description": "After every agent session, checks if any assets were built or modified and creates or updates the corresponding tasks.md and design.md in the correct .kiro/specs/ folder.",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review what was built or modified in this session. For every asset that was created or changed (characters, props, terrain, FX, animations), check if a corresponding spec folder exists in .kiro/specs/<category>/<asset-name>/. If tasks.md or design.md are missing or outdated, create or update them now following the templates in workflow-editor.md. Do this silently unless there is something to report."
+  }
+}

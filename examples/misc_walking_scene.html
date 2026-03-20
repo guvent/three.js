@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js – Walking Scene</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+		<style>
+			* { margin: 0; padding: 0; box-sizing: border-box; }
+			body { background: #87ceeb; overflow: hidden; }
+			canvas { display: block; }
+		</style>
+	</head>
+	<body>
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "../build/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+		<script type="module">
+			import * as THREE from 'three';
+			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+			// ── Renderer ──────────────────────────────────────────────────
+			const renderer = new THREE.WebGLRenderer( { antialias: true } );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.shadowMap.enabled = true;
+			document.body.appendChild( renderer.domElement );
+
+			// ── Scene & Camera ────────────────────────────────────────────
+			const scene = new THREE.Scene();
+			scene.background = new THREE.Color( 0x87ceeb );
+			scene.fog = new THREE.Fog( 0x87ceeb, 20, 40 );
+
+			const camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
+			camera.position.set( 0, 5, 10 );
+			camera.lookAt( 0, 0, 0 );
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+			controls.target.set( 0, 0, 0 );
+			controls.update();
+
+			// ── Lights ────────────────────────────────────────────────────
+			scene.add( new THREE.AmbientLight( 0xffffff, 1.5 ) );
+			const sun = new THREE.DirectionalLight( 0xfff0cc, 2 );
+			sun.position.set( 5, 10, 5 );
+			sun.castShadow = true;
+			scene.add( sun );
+
+			// ── Terrain ───────────────────────────────────────────────────
+			// Grass ground
+			const ground = new THREE.Mesh(
+				new THREE.PlaneGeometry( 20, 20 ),
+				new THREE.MeshToonMaterial( { color: 0x5a8a3c } )
+			);
+			ground.rotation.x = - Math.PI / 2;
+			ground.receiveShadow = true;
+			scene.add( ground );
+
+			// Dirt path — a flat box slightly above ground, running along Z axis
+			const path = new THREE.Mesh(
+				new THREE.BoxGeometry( 1.4, 0.02, 10 ),
+				new THREE.MeshToonMaterial( { color: 0xa0785a } )
+			);
+			path.position.set( 0, 0.01, 0 );
+			path.receiveShadow = true;
+			scene.add( path );
+
+			// ── Character helpers ─────────────────────────────────────────
+			function mat( color ) {
+				return new THREE.MeshToonMaterial( { color } );
+			}
+
+			// ── Build character ───────────────────────────────────────────
+			const root = new THREE.Group();
+			root.name = 'Walker';
+			root.position.set( 0, 1, 0 );
+
+			// Body
+			root.add( new THREE.Mesh( new THREE.CapsuleGeometry( 0.28, 0.5, 8, 16 ), mat( 0xe63946 ) ) );
+
+			// Neck
+			const neck = new THREE.Mesh( new THREE.CylinderGeometry( 0.08, 0.1, 0.15, 12 ), mat( 0xf4c07a ) );
+			neck.position.y = 0.45;
+			root.add( neck );
+
+			// Head group
+			const headGroup = new THREE.Group();
+			headGroup.name = 'head';
+			headGroup.position.y = 0.75;
+			root.add( headGroup );
+
+			headGroup.add( new THREE.Mesh( new THREE.SphereGeometry( 0.28, 32, 32 ), mat( 0xf4c07a ) ) );
+
+			// Hair
+			const hair = new THREE.Mesh(
+				new THREE.SphereGeometry( 0.29, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.45 ),
+				mat( 0x3d2b1f )
+			);
+			hair.position.y = 0.05;
+			headGroup.add( hair );
+
+			// Eyes
+			[ - 0.1, 0.1 ].forEach( x => {
+				const eye = new THREE.Mesh( new THREE.SphereGeometry( 0.04, 16, 16 ), mat( 0x1d3557 ) );
+				eye.position.set( x, 0.05, 0.25 );
+				headGroup.add( eye );
+			} );
+
+			// Arms
+			const armGeo = new THREE.CapsuleGeometry( 0.07, 0.35, 8, 12 );
+
+			const leftArm = new THREE.Group();
+			leftArm.name = 'leftArm';
+			leftArm.position.set( - 0.38, 0.28, 0 );
+			root.add( leftArm );
+			const lArmMesh = new THREE.Mesh( armGeo, mat( 0xe63946 ) );
+			lArmMesh.position.y = - 0.22;
+			leftArm.add( lArmMesh );
+			const lHand = new THREE.Mesh( new THREE.SphereGeometry( 0.07, 12, 12 ), mat( 0xf4c07a ) );
+			lHand.position.y = - 0.48;
+			leftArm.add( lHand );
+
+			const rightArm = new THREE.Group();
+			rightArm.name = 'rightArm';
+			rightArm.position.set( 0.38, 0.28, 0 );
+			root.add( rightArm );
+			const rArmMesh = new THREE.Mesh( armGeo, mat( 0xe63946 ) );
+			rArmMesh.position.y = - 0.22;
+			rightArm.add( rArmMesh );
+			const rHand = new THREE.Mesh( new THREE.SphereGeometry( 0.07, 12, 12 ), mat( 0xf4c07a ) );
+			rHand.position.y = - 0.48;
+			rightArm.add( rHand );
+
+			// Legs
+			const legGeo = new THREE.CapsuleGeometry( 0.09, 0.4, 8, 12 );
+
+			const leftLeg = new THREE.Group();
+			leftLeg.name = 'leftLeg';
+			leftLeg.position.set( - 0.14, - 0.45, 0 );
+			root.add( leftLeg );
+			const lLegMesh = new THREE.Mesh( legGeo, mat( 0x457b9d ) );
+			lLegMesh.position.y = - 0.25;
+			leftLeg.add( lLegMesh );
+			const lShoe = new THREE.Mesh( new THREE.CapsuleGeometry( 0.08, 0.14, 8, 8 ), mat( 0x1d3557 ) );
+			lShoe.rotation.x = Math.PI / 2;
+			lShoe.position.set( - 0.03, - 0.52, 0.05 );
+			leftLeg.add( lShoe );
+
+			const rightLeg = new THREE.Group();
+			rightLeg.name = 'rightLeg';
+			rightLeg.position.set( 0.14, - 0.45, 0 );
+			root.add( rightLeg );
+			const rLegMesh = new THREE.Mesh( legGeo, mat( 0x457b9d ) );
+			rLegMesh.position.y = - 0.25;
+			rightLeg.add( rLegMesh );
+			const rShoe = new THREE.Mesh( new THREE.CapsuleGeometry( 0.08, 0.14, 8, 8 ), mat( 0x1d3557 ) );
+			rShoe.rotation.x = Math.PI / 2;
+			rShoe.position.set( 0.03, - 0.52, 0.05 );
+			rightLeg.add( rShoe );
+
+			scene.add( root );
+
+			// ── Walk animation clip ───────────────────────────────────────
+			const D = 2, N = 17;
+			const times = Array.from( { length: N }, ( _, i ) => ( i / ( N - 1 ) ) * D );
+
+			function sineQuatTrack( name, amplitude, phase ) {
+				const q = new THREE.Quaternion();
+				const axis = new THREE.Vector3( 1, 0, 0 );
+				const values = [];
+				for ( let i = 0; i < N; i ++ ) {
+					const angle = amplitude * Math.sin( ( times[ i ] / D ) * Math.PI * 2 + phase );
+					q.setFromAxisAngle( axis, angle );
+					values.push( q.x, q.y, q.z, q.w );
+				}
+				return new THREE.QuaternionKeyframeTrack( name, times, values );
+			}
+
+			const walkClip = new THREE.AnimationClip( 'Walk', D, [
+				new THREE.NumberKeyframeTrack( '.position[y]', times,
+					times.map( t => 1 + 0.08 * Math.sin( ( t / D ) * Math.PI * 2 ) ) ),
+				sineQuatTrack( 'head.quaternion', 0.06, 0 ),
+				sineQuatTrack( 'leftArm.quaternion', 0.6, 0 ),
+				sineQuatTrack( 'rightArm.quaternion', 0.6, Math.PI ),
+				sineQuatTrack( 'leftLeg.quaternion', 0.4, Math.PI ),
+				sineQuatTrack( 'rightLeg.quaternion', 0.4, 0 ),
+			] );
+
+			const mixer = new THREE.AnimationMixer( root );
+			mixer.clipAction( walkClip ).play();
+
+			// ── Walk along path ───────────────────────────────────────────
+			const PATH_HALF = 4.5;   // walk between Z = -4.5 and +4.5
+			const WALK_SPEED = 2;    // units per second
+			let walkDir = 1;
+
+			// ── Resize ────────────────────────────────────────────────────
+			window.addEventListener( 'resize', () => {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			} );
+
+			// ── Render loop ───────────────────────────────────────────────
+			const clock = new THREE.Clock();
+			renderer.setAnimationLoop( () => {
+				const delta = clock.getDelta();
+				mixer.update( delta );
+
+				// Move character along path
+				root.position.z += walkDir * WALK_SPEED * delta;
+				if ( root.position.z > PATH_HALF ) {
+					root.position.z = PATH_HALF;
+					walkDir = - 1;
+					root.rotation.y = Math.PI; // face the other way
+				} else if ( root.position.z < - PATH_HALF ) {
+					root.position.z = - PATH_HALF;
+					walkDir = 1;
+					root.rotation.y = 0;
+				}
+
+				controls.update();
+				renderer.render( scene, camera );
+			} );
+		</script>
+	</body>
+</html>
