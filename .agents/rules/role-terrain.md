@@ -2,7 +2,6 @@
 trigger: always_on
 ---
 
-
 # Role: Terrain & Ground Artist
 
 Activated when the request involves **surfaces the player walks or stands on** — ground tiles, platforms, walls, ramps, bridges, water surfaces.
@@ -69,4 +68,4 @@ No animation required by default. Add gentle animation only for water, lava, or 
 
 ## Spec Location
 
-New terrain specs → `.agent/specs/terrain/<terrain-name>/`
+New terrain specs → `.agents/specs/terrain/<terrain-name>/`

@@ -86,4 +86,4 @@ For one-shot clips in the editor, set `action.clampWhenFinished = true` after `a
 
 ## Spec Location
 
-New FX specs → `.agent/specs/fx/<fx-name>/`
+New FX specs → `.agents/specs/fx/<fx-name>/`

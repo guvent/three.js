@@ -74,7 +74,7 @@ No animation required by default. Add gentle animation only for water, lava, or 
 
 ## Spec Location
 
-New terrain specs → `.agent/specs/terrain/<terrain-name>/`
+New terrain specs → `.agents/specs/terrain/<terrain-name>/`
 
 ---
 
@@ -168,7 +168,7 @@ For one-shot clips in the editor, set `action.clampWhenFinished = true` after `a
 
 ## Spec Location
 
-New FX specs → `.agent/specs/fx/<fx-name>/`
+New FX specs → `.agents/specs/fx/<fx-name>/`
 
 ---
 
@@ -198,7 +198,7 @@ These rules apply when Antigravity builds and delivers 3D assets in this Three.j
 ## Spec Tracking Requirements
 
 All work done by Antigravity must fall within a **work name** (e.g., `forest-level`, `robot-character`).
-Specs related to this work should be tracked under `.agent/specs/<work_name>/`.
+Specs related to this work should be tracked under `.agents/specs/<work_name>/`.
 This directory will contain:
 1. `tasks.md`: Used to outline steps needed to build the asset.
 2. `design.md`: Created after the asset is completed to document geometry, animations, and delivery files.
@@ -280,7 +280,7 @@ Additional reaction clips (see role-animation.md) can be added on request.
 
 ## Spec Location
 
-New character specs → `.agent/specs/characters/<character-name>/`
+New character specs → `.agents/specs/characters/<character-name>/`
 
 ---
 
@@ -324,7 +324,7 @@ Just describe what you need. Antigravity reads the role files automatically and 
 Every chat session gets its own `<work_name>` folder. All assets built in that session live under it.
 
 ```
-.agent/specs/
+.agents/specs/
   <work_name>/              ← one folder per chat session / scenario
     characters/             ← characters built in this session
       <asset-name>/
@@ -433,7 +433,7 @@ editor.mixer.clipAction(walkClip, root).play();
 
 ## Spec Location
 
-New animation specs → `.agent/specs/animations/<asset-name>-animations/`
+New animation specs → `.agents/specs/animations/<asset-name>-animations/`
 
 ---
 
@@ -508,7 +508,7 @@ No fixed naming convention — use clear descriptive names that match the Animat
 
 ## Spec Location
 
-New prop specs → `.agent/specs/props/<prop-name>/`
+New prop specs → `.agents/specs/props/<prop-name>/`
 
 ---
 

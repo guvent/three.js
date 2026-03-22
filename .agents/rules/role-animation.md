@@ -76,4 +76,4 @@ editor.mixer.clipAction(walkClip, root).play();
 
 ## Spec Location
 
-New animation specs → `.agent/specs/animations/<asset-name>-animations/`
+New animation specs → `.agents/specs/animations/<asset-name>-animations/`

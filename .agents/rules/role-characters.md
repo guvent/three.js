@@ -69,4 +69,4 @@ Additional reaction clips (see role-animation.md) can be added on request.
 
 ## Spec Location
 
-New character specs → `.agent/specs/characters/<character-name>/`
+New character specs → `.agents/specs/characters/<character-name>/`

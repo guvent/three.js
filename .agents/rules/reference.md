@@ -36,7 +36,7 @@ Just describe what you need. Antigravity reads the role files automatically and 
 Every chat session gets its own `<work_name>` folder. All assets built in that session live under it.
 
 ```
-.agent/specs/
+.agents/specs/
   <work_name>/              ← one folder per chat session / scenario
     characters/             ← characters built in this session
       <asset-name>/

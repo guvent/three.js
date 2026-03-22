@@ -22,7 +22,7 @@ These rules apply when Antigravity builds and delivers 3D assets in this Three.j
 ## Spec Tracking Requirements
 
 All work done by Antigravity must fall within a **work name** (e.g., `forest-level`, `robot-character`).
-Specs related to this work should be tracked under `.agent/specs/<work_name>/`.
+Specs related to this work should be tracked under `.agents/specs/<work_name>/`.
 This directory will contain:
 1. `tasks.md`: Used to outline steps needed to build the asset.
 2. `design.md`: Created after the asset is completed to document geometry, animations, and delivery files.

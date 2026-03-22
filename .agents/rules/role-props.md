@@ -67,4 +67,4 @@ No fixed naming convention — use clear descriptive names that match the Animat
 
 ## Spec Location
 
-New prop specs → `.agent/specs/props/<prop-name>/`
+New prop specs → `.agents/specs/props/<prop-name>/`
