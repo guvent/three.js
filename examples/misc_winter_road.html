@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>three.js - Winter Road Terrain</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="main.css">
+	<style>
+		body {
+			background-color: #b3d4ff;
+			color: #444;
+		}
+		a {
+			color: #08f;
+		}
+	</style>
+</head>
+<body>
+	<div id="info">
+		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - Winter Road Terrain<br/>
+	</div>
+
+	<script type="importmap">
+		{
+			"imports": {
+				"three": "../build/three.module.js",
+				"three/addons/": "./jsm/"
+			}
+		}
+	</script>
+
+	<script type="module">
+
+		import * as THREE from 'three';
+		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+		let camera, scene, renderer, clock;
+
+		init();
+
+		function init() {
+			const container = document.createElement( 'div' );
+			document.body.appendChild( container );
+
+			camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 100 );
+			camera.position.set( 10, 8, 15 );
+
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color( 0xb3d4ff );
+			scene.fog = new THREE.Fog( 0xb3d4ff, 10, 50 );
+
+			clock = new THREE.Clock();
+
+			// lights
+			const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444, 2 );
+			hemiLight.position.set( 0, 20, 0 );
+			scene.add( hemiLight );
+
+			const dirLight = new THREE.DirectionalLight( 0xffffff, 2 );
+			dirLight.position.set( 5, 10, 5 );
+			dirLight.castShadow = true;
+			dirLight.shadow.camera.top = 20;
+			dirLight.shadow.camera.bottom = - 20;
+			dirLight.shadow.camera.left = - 20;
+			dirLight.shadow.camera.right = 20;
+			dirLight.shadow.camera.near = 0.1;
+			dirLight.shadow.camera.far = 40;
+			scene.add( dirLight );
+
+			// terrain
+			const winterRoad = createWinterRoad();
+			winterRoad.traverse( function ( object ) {
+				if ( object.isMesh ) {
+					object.castShadow = true;
+					object.receiveShadow = true;
+				}
+			} );
+			scene.add( winterRoad );
+
+			renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( animate );
+			renderer.shadowMap.enabled = true;
+			container.appendChild( renderer.domElement );
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+			controls.target.set( 0, 0, 0 );
+			controls.update();
+
+			window.addEventListener( 'resize', onWindowResize );
+		}
+
+		function createWinterRoad() {
+			function mat( color ) {
+				return new THREE.MeshToonMaterial( { color } );
+			}
+
+			const winterRoad = new THREE.Group();
+			winterRoad.name = 'WinterRoad';
+
+			const extrudeSettings = { depth: 240, bevelEnabled: false, curveSegments: 4 };
+			const shape = new THREE.Shape();
+			shape.moveTo( 0, 0 );
+			shape.lineTo( 8, 0 );
+			shape.lineTo( 8, 1 );
+			shape.lineTo( 0, 1 );
+			shape.lineTo( 0, 0 );
+			const sideGeom = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+
+			// Ground
+			const groundGeo = new THREE.PlaneGeometry( 20, 240 );
+			const ground = new THREE.Mesh( groundGeo, mat( 0xeeeeff ) );
+			ground.rotation.x = - Math.PI / 2;
+			ground.name = 'ground';
+			winterRoad.add( ground );
+
+			const leftGround = new THREE.Mesh( sideGeom, mat( 0xeeeeff ) );
+			leftGround.rotation.x = -Math.PI / 2;
+			leftGround.position.set( -10, 0, -120 );
+			leftGround.name = 'leftGround';
+			winterRoad.add( leftGround );
+
+			const rightGround = new THREE.Mesh( sideGeom, mat( 0xeeeeff ) );
+			rightGround.rotation.x = -Math.PI / 2;
+			rightGround.rotation.y = Math.PI;
+			rightGround.position.set( 10, 0, 120 );
+			rightGround.name = 'rightGround';
+			winterRoad.add( rightGround );
+
+			// Road (Ice)
+			const roadGeo = new THREE.PlaneGeometry( 4, 240 );
+			const road = new THREE.Mesh( roadGeo, mat( 0xaaddff ) );
+			road.rotation.x = - Math.PI / 2;
+			road.position.y = 0.01;
+			road.name = 'road';
+			winterRoad.add( road );
+
+			// Snow Banks
+			const bankGeo = new THREE.CylinderGeometry( 0.4, 0.5, 240, 8 );
+			
+			const leftBank = new THREE.Mesh( bankGeo, mat( 0xeeeeff ) );
+			leftBank.rotation.x = -Math.PI / 2;
+			leftBank.position.set( -2.2, 0.1, 0 );
+			leftBank.name = 'leftBank';
+			winterRoad.add( leftBank );
+
+			const rightBank = new THREE.Mesh( bankGeo, mat( 0xeeeeff ) );
+			rightBank.rotation.x = -Math.PI / 2;
+			rightBank.position.set( 2.2, 0.1, 0 );
+			rightBank.name = 'rightBank';
+			winterRoad.add( rightBank );
+
+			// Gentle Hills
+			const hillsGrp = new THREE.Group();
+			hillsGrp.name = 'hills';
+			winterRoad.add( hillsGrp );
+
+			let m_w = 123456789;
+			let m_z = 987654321;
+			const mask = 0xffffffff;
+			function seedRandom() {
+				m_z = ( 36969 * ( m_z & 65535 ) + ( m_z >> 16 ) ) & mask;
+				m_w = ( 18000 * ( m_w & 65535 ) + ( m_w >> 16 ) ) & mask;
+				let result = ( ( m_z << 16 ) + m_w ) & mask;
+				result /= 4294967296;
+				return result + 0.5;
+			}
+
+			for ( let i = 0; i < 60; i ++ ) {
+				const radius = 1.0 + seedRandom() * 2.0;
+				const hillGeo = new THREE.SphereGeometry( radius, 16, 16 );
+				const hill = new THREE.Mesh( hillGeo, mat( 0xeeeeff ) );
+
+				const side = seedRandom() < 0.5 ? -1 : 1;
+				const edgeOffset = 4.0 + seedRandom() * 4.0;
+				hill.position.x = side * edgeOffset;
+				hill.position.y = -0.2;
+				hill.position.z = ( seedRandom() - 0.5 ) * 230;
+				
+				hill.scale.set( 1 + seedRandom(), 0.3 + seedRandom() * 0.3, 1 + seedRandom() );
+
+				hillsGrp.add( hill );
+			}
+
+			return winterRoad;
+		}
+
+		function onWindowResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+		}
+
+		function animate() {
+			renderer.render( scene, camera );
+		}
+
+	</script>
+</body>
+</html>

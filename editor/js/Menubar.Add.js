@@ -1163,6 +1163,89 @@ function MenubarAdd( editor ) {
 	} );
 	options.add( option );
 
+	// Winter Road
+	option = new UIRow();
+	option.setClass( 'option' );
+	option.setTextContent( 'Winter Road' );
+	option.onClick( function () {
+
+		function mat( color, roughness = 1 ) {
+			return new THREE.MeshStandardMaterial( { color, roughness, metalness: 0 } );
+		}
+
+		const winterRoad = new THREE.Group();
+		winterRoad.name = 'WinterRoad';
+
+		// Road Surface (Ice)
+		const roadGeo = new THREE.PlaneGeometry( 4, 240 );
+		const road = new THREE.Mesh( roadGeo, mat( 0xaaddff, 0.4 ) );
+		road.rotation.x = - Math.PI / 2;
+		road.position.y = 0.01;
+		road.name = 'road';
+		winterRoad.add( road );
+
+		// Deep Snow (Raised Ground)
+		const shape = new THREE.Shape();
+		shape.moveTo( 2, 0 );
+		shape.bezierCurveTo( 2.2, 0.1, 2.3, 0.6, 2.8, 0.5 ); // Plow margin bulge
+		shape.lineTo( 12, 0.5 );
+		shape.lineTo( 12, -0.2 );
+		shape.lineTo( 2, -0.2 );
+
+		const extrudeSettings = { depth: 240, bevelEnabled: false, curveSegments: 4 };
+		const sideGeom = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+
+		const rightGround = new THREE.Mesh( sideGeom, mat( 0xeeeeff ) );
+		rightGround.position.z = -120;
+		rightGround.name = 'rightGround';
+		winterRoad.add( rightGround );
+
+		const leftGround = new THREE.Mesh( sideGeom, mat( 0xeeeeff ) );
+		leftGround.rotation.y = Math.PI;
+		leftGround.position.z = 120;
+		leftGround.name = 'leftGround';
+		winterRoad.add( leftGround );
+
+		// Gentle Hills on top of the snow
+		const hillsGrp = new THREE.Group();
+		hillsGrp.name = 'hills';
+		winterRoad.add( hillsGrp );
+
+		for ( let i = 0; i < 60; i ++ ) {
+			const radius = 1.0 + Math.random() * 3.0;
+			const hillGeo = new THREE.SphereGeometry( radius, 16, 16 );
+			const hill = new THREE.Mesh( hillGeo, mat( 0xeeeeff ) );
+
+			const side = Math.random() < 0.5 ? -1 : 1;
+			const edgeOffset = 5.0 + Math.random() * 5.0;
+			hill.position.x = side * edgeOffset;
+			hill.position.y = 0.5; // sit on top of the 0.5 high snow plane
+			hill.position.z = ( Math.random() - 0.5 ) * 230;
+			
+			// Flatten to make it a gentle hill
+			hill.scale.set( 1 + Math.random(), 0.2 + Math.random() * 0.2, 1 + Math.random() );
+
+			hillsGrp.add( hill );
+		}
+
+		// Lighting
+		const hasLight = editor.scene.children.some( c => c.isLight );
+		if ( ! hasLight ) {
+			const ambient = new THREE.AmbientLight( 0xffffff, 1.5 );
+			ambient.name = 'AmbientLight';
+			editor.execute( new AddObjectCommand( editor, ambient ) );
+
+			const dirLight = new THREE.DirectionalLight( 0xfff0cc, 2 );
+			dirLight.name = 'DirectionalLight';
+			dirLight.position.set( 5, 10, 5 );
+			editor.execute( new AddObjectCommand( editor, dirLight ) );
+		}
+
+		editor.execute( new AddObjectCommand( editor, winterRoad ) );
+
+	} );
+	options.add( option );
+
 	return container;
 
 }
