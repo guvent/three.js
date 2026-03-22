@@ -99,34 +99,26 @@
 			const winterRoad = new THREE.Group();
 			winterRoad.name = 'WinterRoad';
 
-			const extrudeSettings = { depth: 240, bevelEnabled: false, curveSegments: 4 };
 			const shape = new THREE.Shape();
-			shape.moveTo( 0, 0 );
-			shape.lineTo( 8, 0 );
-			shape.lineTo( 8, 1 );
-			shape.lineTo( 0, 1 );
-			shape.lineTo( 0, 0 );
+			shape.moveTo( 2, 0 );
+			shape.bezierCurveTo( 2.2, 0.1, 2.3, 0.6, 2.8, 0.5 ); // Plow margin bulge
+			shape.lineTo( 12, 0.5 );
+			shape.lineTo( 12, -0.2 );
+			shape.lineTo( 2, -0.2 );
+
+			const extrudeSettings = { depth: 240, bevelEnabled: false, curveSegments: 4 };
 			const sideGeom = new THREE.ExtrudeGeometry( shape, extrudeSettings );
 
-			// Ground
-			const groundGeo = new THREE.PlaneGeometry( 20, 240 );
-			const ground = new THREE.Mesh( groundGeo, mat( 0xeeeeff ) );
-			ground.rotation.x = - Math.PI / 2;
-			ground.name = 'ground';
-			winterRoad.add( ground );
-
-			const leftGround = new THREE.Mesh( sideGeom, mat( 0xeeeeff ) );
-			leftGround.rotation.x = -Math.PI / 2;
-			leftGround.position.set( -10, 0, -120 );
-			leftGround.name = 'leftGround';
-			winterRoad.add( leftGround );
-
 			const rightGround = new THREE.Mesh( sideGeom, mat( 0xeeeeff ) );
-			rightGround.rotation.x = -Math.PI / 2;
-			rightGround.rotation.y = Math.PI;
-			rightGround.position.set( 10, 0, 120 );
+			rightGround.position.z = -120;
 			rightGround.name = 'rightGround';
 			winterRoad.add( rightGround );
+
+			const leftGround = new THREE.Mesh( sideGeom, mat( 0xeeeeff ) );
+			leftGround.rotation.y = Math.PI;
+			leftGround.position.z = 120;
+			leftGround.name = 'leftGround';
+			winterRoad.add( leftGround );
 
 			// Road (Ice)
 			const roadGeo = new THREE.PlaneGeometry( 4, 240 );
@@ -135,21 +127,6 @@
 			road.position.y = 0.01;
 			road.name = 'road';
 			winterRoad.add( road );
-
-			// Snow Banks
-			const bankGeo = new THREE.CylinderGeometry( 0.4, 0.5, 240, 8 );
-			
-			const leftBank = new THREE.Mesh( bankGeo, mat( 0xeeeeff ) );
-			leftBank.rotation.x = -Math.PI / 2;
-			leftBank.position.set( -2.2, 0.1, 0 );
-			leftBank.name = 'leftBank';
-			winterRoad.add( leftBank );
-
-			const rightBank = new THREE.Mesh( bankGeo, mat( 0xeeeeff ) );
-			rightBank.rotation.x = -Math.PI / 2;
-			rightBank.position.set( 2.2, 0.1, 0 );
-			rightBank.name = 'rightBank';
-			winterRoad.add( rightBank );
 
 			// Gentle Hills
 			const hillsGrp = new THREE.Group();
@@ -167,6 +144,44 @@
 				return result + 0.5;
 			}
 
+			// Winter Trees
+			const treesGrp = new THREE.Group();
+			treesGrp.name = 'trees';
+			winterRoad.add( treesGrp );
+
+			const scales = [ 0.8, 1.2, 1.6 ];
+
+			for ( let i = 0; i < 120; i ++ ) {
+				const tree = new THREE.Group();
+				
+				const trunkGeo = new THREE.CylinderGeometry( 0.15, 0.2, 1.5, 8 );
+				const trunk = new THREE.Mesh( trunkGeo, mat( 0x8b6914 ) );
+				trunk.position.y = 0.75;
+				tree.add( trunk );
+
+				const leavesGeo = new THREE.ConeGeometry( 0.8, 2.0, 8 );
+				const leaves = new THREE.Mesh( leavesGeo, mat( 0x4a7c59 ) );
+				leaves.position.y = 2.2;
+				tree.add( leaves );
+
+				const snowTopGeo = new THREE.ConeGeometry( 0.43, 1.2, 8, 1, true );
+				const snowTop = new THREE.Mesh( snowTopGeo, mat( 0xeeeeff ) );
+				snowTop.position.y = 2.7;
+				tree.add( snowTop );
+
+				tree.rotation.y = seedRandom() * Math.PI * 2;
+				const idx = Math.floor( seedRandom() * scales.length );
+				const scale = scales[ idx === scales.length ? 0 : idx ];
+				tree.scale.setScalar( scale );
+
+				const side = seedRandom() < 0.5 ? -1 : 1;
+				tree.position.x = side * ( 4.0 + seedRandom() * 7.0 );
+				tree.position.y = 0.2; // sink into snow to guarantee ground contact
+				tree.position.z = ( seedRandom() - 0.5 ) * 230;
+
+				treesGrp.add( tree );
+			}
+
 			for ( let i = 0; i < 60; i ++ ) {
 				const radius = 1.0 + seedRandom() * 2.0;
 				const hillGeo = new THREE.SphereGeometry( radius, 16, 16 );
@@ -175,7 +190,7 @@
 				const side = seedRandom() < 0.5 ? -1 : 1;
 				const edgeOffset = 4.0 + seedRandom() * 4.0;
 				hill.position.x = side * edgeOffset;
-				hill.position.y = -0.2;
+				hill.position.y = 0.5; // sit tightly on the deep snow
 				hill.position.z = ( seedRandom() - 0.5 ) * 230;
 				
 				hill.scale.set( 1 + seedRandom(), 0.3 + seedRandom() * 0.3, 1 + seedRandom() );

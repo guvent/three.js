@@ -1228,6 +1228,40 @@ function MenubarAdd( editor ) {
 			hillsGrp.add( hill );
 		}
 
+		// Winter Trees
+		const treesGrp = new THREE.Group();
+		treesGrp.name = 'trees';
+		winterRoad.add( treesGrp );
+
+		const scales = [ 0.8, 1.2, 1.6 ];
+
+		for ( let i = 0; i < 120; i ++ ) {
+			const tree = new THREE.Group();
+			
+			const trunk = new THREE.Mesh( new THREE.CylinderGeometry( 0.15, 0.2, 1.5, 8 ), mat( 0x8b6914 ) );
+			trunk.position.y = 0.75;
+			tree.add( trunk );
+
+			const leaves = new THREE.Mesh( new THREE.ConeGeometry( 0.8, 2.0, 8 ), mat( 0x4a7c59 ) );
+			leaves.position.y = 2.2;
+			tree.add( leaves );
+
+			const snowTop = new THREE.Mesh( new THREE.ConeGeometry( 0.43, 1.2, 8, 1, true ), mat( 0xeeeeff ) );
+			snowTop.position.y = 2.7; // top peak at 3.3, bottom base safely hidden inside green leaves
+			tree.add( snowTop );
+
+			tree.rotation.y = Math.random() * Math.PI * 2;
+			const scale = scales[ Math.floor( Math.random() * scales.length ) ];
+			tree.scale.setScalar( scale );
+
+			const side = Math.random() < 0.5 ? -1 : 1;
+			tree.position.x = side * ( 4.0 + Math.random() * 7.0 );
+			tree.position.y = 0.2; // sink into snow to guarantee ground contact
+			tree.position.z = ( Math.random() - 0.5 ) * 230;
+
+			treesGrp.add( tree );
+		}
+
 		// Lighting
 		const hasLight = editor.scene.children.some( c => c.isLight );
 		if ( ! hasLight ) {
