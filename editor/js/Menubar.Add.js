@@ -934,6 +934,235 @@ function MenubarAdd( editor ) {
 	} );
 	options.add( option );
 
+	// Cute Penguin
+	option = new UIRow();
+	option.setClass( 'option' );
+	option.setTextContent( 'Cute Penguin' );
+	option.onClick( function () {
+
+		function mat( color ) {
+			return new THREE.MeshToonMaterial( { color } );
+		}
+
+		const penguin = new THREE.Group();
+		penguin.name = 'CutePenguin';
+		penguin.position.y = 0.5;
+
+		const black = 0x1d3557;
+		const white = 0xf1faee;
+		const orange = 0xf4a261;
+
+		// Body
+		const bodyGrp = new THREE.Group();
+		bodyGrp.name = 'body';
+		penguin.add( bodyGrp );
+
+		const backGeo = new THREE.CapsuleGeometry( 0.45, 0.4, 8, 16 );
+		const backMesh = new THREE.Mesh( backGeo, mat( black ) );
+		bodyGrp.add( backMesh );
+
+		const bellyGeo = new THREE.CapsuleGeometry( 0.41, 0.35, 8, 16 );
+		const bellyMesh = new THREE.Mesh( bellyGeo, mat( white ) );
+		bellyMesh.position.set( 0, -0.02, 0.08 );
+		bodyGrp.add( bellyMesh );
+
+		// Head Group
+		const headGroup = new THREE.Group();
+		headGroup.name = 'head';
+		headGroup.position.set( 0, 0.55, 0 );
+		penguin.add( headGroup );
+
+		const headGeo = new THREE.SphereGeometry( 0.4, 32, 32 );
+		const headMesh = new THREE.Mesh( headGeo, mat( black ) );
+		headGroup.add( headMesh );
+
+		// Face mask
+		const faceGeo = new THREE.SphereGeometry( 0.38, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.45 );
+		const faceMesh = new THREE.Mesh( faceGeo, mat( white ) );
+		faceMesh.rotation.x = Math.PI / 2;
+		faceMesh.rotation.y = Math.PI;
+		faceMesh.position.set( 0, 0, 0.05 );
+		headGroup.add( faceMesh );
+
+		// Beak
+		const beakGeo = new THREE.ConeGeometry( 0.1, 0.25, 12 );
+		const beakMesh = new THREE.Mesh( beakGeo, mat( orange ) );
+		beakMesh.rotation.x = Math.PI / 2;
+		beakMesh.position.set( 0, 0, 0.4 );
+		headGroup.add( beakMesh );
+
+		// Beanie
+		const red = 0xe63946;
+		const beanieGeo = new THREE.SphereGeometry( 0.41, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2 + 0.1 );
+		const beanieMesh = new THREE.Mesh( beanieGeo, mat( red ) );
+		beanieMesh.position.y = 0.02;
+		headGroup.add( beanieMesh );
+
+		const pomGeo = new THREE.SphereGeometry( 0.12, 12, 12 );
+		const pomMesh = new THREE.Mesh( pomGeo, mat( white ) );
+		pomMesh.position.y = 0.45;
+		headGroup.add( pomMesh );
+
+		// Scarf
+		const scarfGroup = new THREE.Group();
+		scarfGroup.name = 'scarf';
+		scarfGroup.position.set( 0, 0.45, 0 );
+		penguin.add( scarfGroup );
+
+		const scarfRingGeo = new THREE.TorusGeometry( 0.38, 0.09, 8, 16 );
+		const scarfRing = new THREE.Mesh( scarfRingGeo, mat( red ) );
+		scarfRing.rotation.x = Math.PI / 2;
+		scarfGroup.add( scarfRing );
+
+		const scarfTailGeo = new THREE.CapsuleGeometry( 0.08, 0.25, 4, 8 );
+		const scarfTail = new THREE.Mesh( scarfTailGeo, mat( red ) );
+		scarfTail.position.set( 0.25, -0.15, 0.25 );
+		scarfTail.rotation.z = Math.PI / 6;
+		scarfTail.rotation.x = -Math.PI / 6;
+		scarfGroup.add( scarfTail );
+
+		// Eyes
+		[ - 0.15, 0.15 ].forEach( x => {
+			const eye = new THREE.Mesh( new THREE.SphereGeometry( 0.06, 16, 16 ), mat( black ) );
+			eye.position.set( x, 0.1, 0.38 );
+			headGroup.add( eye );
+
+			const hl = new THREE.Mesh( new THREE.SphereGeometry( 0.02, 8, 8 ), mat( white ) );
+			hl.position.set( x + 0.02, 0.12, 0.43 );
+			headGroup.add( hl );
+		} );
+
+		// Flippers (Arms)
+		const armGeo = new THREE.CapsuleGeometry( 0.1, 0.5, 8, 12 );
+		
+		const leftArm = new THREE.Group();
+		leftArm.name = 'leftArm';
+		leftArm.position.set( -0.45, 0.2, 0 );
+		penguin.add( leftArm );
+		const lArmMesh = new THREE.Mesh( armGeo, mat( black ) );
+		lArmMesh.position.y = -0.3;
+		leftArm.add( lArmMesh );
+
+		const rightArm = new THREE.Group();
+		rightArm.name = 'rightArm';
+		rightArm.position.set( 0.45, 0.2, 0 );
+		penguin.add( rightArm );
+		const rArmMesh = new THREE.Mesh( armGeo, mat( black ) );
+		rArmMesh.position.y = -0.3;
+		rightArm.add( rArmMesh );
+
+		// Feet (Legs)
+		const footGeo = new THREE.CapsuleGeometry( 0.12, 0.2, 8, 8 );
+		
+		const leftLeg = new THREE.Group();
+		leftLeg.name = 'leftLeg';
+		leftLeg.position.set( -0.2, -0.4, 0 );
+		penguin.add( leftLeg );
+		const lFoot = new THREE.Mesh( footGeo, mat( orange ) );
+		lFoot.rotation.x = Math.PI / 2;
+		lFoot.position.set( 0, -0.1, 0.1 );
+		leftLeg.add( lFoot );
+
+		const rightLeg = new THREE.Group();
+		rightLeg.name = 'rightLeg';
+		rightLeg.position.set( 0.2, -0.4, 0 );
+		penguin.add( rightLeg );
+		const rFoot = new THREE.Mesh( footGeo, mat( orange ) );
+		rFoot.rotation.x = Math.PI / 2;
+		rFoot.position.set( 0, -0.1, 0.1 );
+		rightLeg.add( rFoot );
+
+		// Animations (CharacterWalk and CharacterIdle)
+		const D_Walk = 2; // 2s loop
+		const N = 17;
+		const timesWalk = Array.from({length: N}, (_, i) => (i / (N-1)) * D_Walk);
+		
+		function sineQuatTrack( name, amplitude, phase, axisVec = new THREE.Vector3(1, 0, 0) ) {
+			const q = new THREE.Quaternion();
+			const values = [];
+			for ( let i = 0; i < N; i ++ ) {
+				const angle = amplitude * Math.sin( ( timesWalk[ i ] / D_Walk ) * Math.PI * 2 + phase );
+				q.setFromAxisAngle( axisVec, angle );
+				values.push( q.x, q.y, q.z, q.w );
+			}
+			return new THREE.QuaternionKeyframeTrack( name, timesWalk, values );
+		}
+
+		function bobTrack(name, base, amp) {
+			return new THREE.NumberKeyframeTrack( name, timesWalk, timesWalk.map( t => base + amp * Math.cos( ( t / D_Walk ) * Math.PI * 4 ) ) );
+		}
+
+		function stepTrack(name, base, amp, phase) {
+			return new THREE.NumberKeyframeTrack( name, timesWalk, timesWalk.map( t => {
+				const angle = ( t / D_Walk ) * Math.PI * 2 + phase;
+				return base + amp * Math.max( 0, Math.sin( angle ) );
+			} ) );
+		}
+
+		const walkTracks = [
+			bobTrack( '.position[y]', 0.52, 0.04 ), // bob
+			sineQuatTrack( '.quaternion', 0.12, 0, new THREE.Vector3(0, 0, 1) ), // waddle sway side-to-side
+			sineQuatTrack( 'head.quaternion', 0.05, 0 ),
+			sineQuatTrack( 'leftArm.quaternion', 0.4, 0 ),
+			sineQuatTrack( 'rightArm.quaternion', 0.4, Math.PI ),
+			sineQuatTrack( 'leftLeg.quaternion', 0.4, Math.PI ),
+			sineQuatTrack( 'rightLeg.quaternion', 0.4, 0 ),
+			stepTrack( 'leftLeg.position[y]', -0.4, 0.12, Math.PI ),
+			stepTrack( 'rightLeg.position[y]', -0.4, 0.12, 0 )
+		];
+		const walkClip = new THREE.AnimationClip( 'CharacterWalk', D_Walk, walkTracks );
+
+		// Idle clip (breathing)
+		const D_Idle = 2;
+		const timesIdle = Array.from({length: N}, (_, i) => (i / (N-1)) * D_Idle);
+		const idleTracks = [
+			new THREE.NumberKeyframeTrack( '.position[y]', timesIdle, timesIdle.map( t => 0.5 + 0.03 * Math.sin( ( t / D_Idle ) * Math.PI * 2 ) ) ),
+			new THREE.QuaternionKeyframeTrack( 'head.quaternion', timesIdle, (()=> {
+				const q = new THREE.Quaternion();
+				const v = [];
+				for(let i=0; i<N; i++) {
+					q.setFromAxisAngle(new THREE.Vector3(1,0,0), 0.04 * Math.sin( (timesIdle[i]/D_Idle) * Math.PI * 2));
+					v.push(q.x, q.y, q.z, q.w);
+				}
+				return v;
+			})() )
+		];
+		const idleClip = new THREE.AnimationClip( 'CharacterIdle', D_Idle, idleTracks );
+
+		penguin.animations = [ walkClip, idleClip ];
+
+		// Editor needs StandardMaterial
+		penguin.traverse( function ( child ) {
+			if ( child.isMesh && child.material && child.material.isMeshToonMaterial ) {
+				child.material = new THREE.MeshStandardMaterial( {
+					color: child.material.color,
+					roughness: 0.8,
+					metalness: 0.0
+				} );
+			}
+		} );
+
+		const hasLight = editor.scene.children.some( c => c.isLight );
+		if ( ! hasLight ) {
+			const ambient = new THREE.AmbientLight( 0xffffff, 1.5 );
+			ambient.name = 'AmbientLight';
+			editor.execute( new AddObjectCommand( editor, ambient ) );
+
+			const dirLight = new THREE.DirectionalLight( 0xfff0cc, 2 );
+			dirLight.name = 'DirectionalLight';
+			dirLight.position.set( 5, 10, 5 );
+			editor.execute( new AddObjectCommand( editor, dirLight ) );
+		}
+
+		editor.execute( new AddObjectCommand( editor, penguin ) );
+
+		const action = editor.mixer.clipAction( walkClip, penguin );
+		action.setLoop( THREE.LoopRepeat, Infinity );
+		action.play();
+
+	} );
+	options.add( option );
+
 	return container;
 
 }
